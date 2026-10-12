@@ -1,0 +1,1023 @@
+asyncapi: 3.0.0
+
+info:
+  title: Bitvavo WS Market Data Pro API
+  version: 1.0.0
+  description: |
+    Low-latency WebSocket feed for real-time market data on Bitvavo. Provides order book snapshots, ticker prices, trades, and streaming subscriptions for book updates, ticker events, and trade events.
+
+servers:
+  production:
+    host: ws-mdpro.bitvavo.com
+    pathname: /v2
+    protocol: wss
+
+operations:
+
+  # ---------------------------------------------------------------------------
+  # Market data actions
+  # ---------------------------------------------------------------------------
+
+  getBook:
+    action: send
+    channel:
+      $ref: '#/channels/getBook'
+    summary: Get order book
+    description: |
+      Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getBookReply'
+
+  getTickerPrice:
+    action: send
+    channel:
+      $ref: '#/channels/getTickerPrice'
+    summary: Get ticker prices
+    description: |
+      Returns prices of the latest trades on Bitvavo for all markets or a single `market`.
+
+      :::info
+      A _tick_ in a market is any change in the price of a digital asset.
+      :::
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getTickerPriceReply'
+
+  getTickerBook:
+    action: send
+    channel:
+      $ref: '#/channels/getTickerBook'
+    summary: Get ticker book
+    description: |
+      Stream the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getTickerBookReply'
+
+  getTrades:
+    action: send
+    channel:
+      $ref: '#/channels/getTrades'
+    summary: Get trades
+    description: |
+      Returns trades for the specified `market` and time period made by all Bitvavo users. The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest.
+
+      **Rate limit weight points**: 5
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getTradesReply'
+
+  getMarkets:
+    action: send
+    channel:
+      $ref: '#/channels/getMarkets'
+    summary: Get markets
+    description: |
+      Returns the information about one or all markets on Bitvavo.
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getMarketsReply'
+
+  getAssets:
+    action: send
+    channel:
+      $ref: '#/channels/getAssets'
+    summary: Get asset data
+    description: |
+      Returns the information about the specified assets.
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Market data actions
+    reply:
+      channel:
+        $ref: '#/channels/getAssetsReply'
+
+  # ---------------------------------------------------------------------------
+  # Market data channels (subscriptions)
+  # ---------------------------------------------------------------------------
+
+  subscribeToBook:
+    action: send
+    channel:
+      $ref: '#/channels/bookSubscription'
+    summary: Book subscription
+    description: |
+      Subscribes to events that return data when there is a change in the order book.
+    tags:
+      - name: Market data channels
+    reply:
+      channel:
+        $ref: '#/channels/bookEvents'
+
+  subscribeToTicker:
+    action: send
+    channel:
+      $ref: '#/channels/tickerSubscription'
+    summary: Ticker subscription
+    description: |
+      Subscribes to ticker events which return an object every time the best bid or ask changes.
+    tags:
+      - name: Market data channels
+    reply:
+      channel:
+        $ref: '#/channels/tickerEvents'
+
+  subscribeToTrades:
+    action: send
+    channel:
+      $ref: '#/channels/tradesSubscription'
+    summary: Trades subscription
+    description: |
+      Subscribes to events that return data when a trade is made.
+    tags:
+      - name: Market data channels
+    reply:
+      channel:
+        $ref: '#/channels/tradesEvents'
+
+# =============================================================================
+# Channels
+# =============================================================================
+
+channels:
+
+  getBook:
+    messages:
+      getBookRequest:
+        $ref: '#/components/messages/getBookRequest'
+  getBookReply:
+    messages:
+      getBookResponse:
+        $ref: '#/components/messages/getBookResponse'
+
+  getTickerPrice:
+    messages:
+      getTickerPriceRequest:
+        $ref: '#/components/messages/getTickerPriceRequest'
+  getTickerPriceReply:
+    messages:
+      getTickerPriceResponse:
+        $ref: '#/components/messages/getTickerPriceResponse'
+
+  getTickerBook:
+    messages:
+      getTickerBookRequest:
+        $ref: '#/components/messages/getTickerBookRequest'
+  getTickerBookReply:
+    messages:
+      getTickerBookResponse:
+        $ref: '#/components/messages/getTickerBookResponse'
+
+  getTrades:
+    messages:
+      getTradesRequest:
+        $ref: '#/components/messages/getTradesRequest'
+  getTradesReply:
+    messages:
+      getTradesResponse:
+        $ref: '#/components/messages/getTradesResponse'
+
+  getMarkets:
+    messages:
+      getMarketsRequest:
+        $ref: '#/components/messages/getMarketsRequest'
+  getMarketsReply:
+    messages:
+      getMarketsResponse:
+        $ref: '#/components/messages/getMarketsResponse'
+
+  getAssets:
+    messages:
+      getAssetsRequest:
+        $ref: '#/components/messages/getAssetsRequest'
+  getAssetsReply:
+    messages:
+      getAssetsResponse:
+        $ref: '#/components/messages/getAssetsResponse'
+
+  bookSubscription:
+    messages:
+      bookSubscribeRequest:
+        $ref: '#/components/messages/bookSubscriptionRequest'
+  bookEvents:
+    messages:
+      bookConfirmation:
+        $ref: '#/components/messages/bookSubscriptionConfirmation'
+      bookEvent:
+        $ref: '#/components/messages/bookEvent'
+
+  tickerSubscription:
+    messages:
+      tickerSubscribeRequest:
+        $ref: '#/components/messages/tickerSubscriptionRequest'
+  tickerEvents:
+    messages:
+      tickerConfirmation:
+        $ref: '#/components/messages/tickerSubscriptionConfirmation'
+      tickerEvent:
+        $ref: '#/components/messages/tickerEvent'
+
+  tradesSubscription:
+    messages:
+      tradesSubscribeRequest:
+        $ref: '#/components/messages/tradesSubscriptionRequest'
+  tradesEvents:
+    messages:
+      tradesConfirmation:
+        $ref: '#/components/messages/tradesSubscriptionConfirmation'
+      tradesEvent:
+        $ref: '#/components/messages/tradesEvent'
+
+# =============================================================================
+# Components
+# =============================================================================
+
+components:
+
+  messages:
+
+    # =========================================================================
+    # Market data action messages
+    # =========================================================================
+
+    getBookRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getBook**.
+            type: string
+            example: getBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+          depth:
+            description: The number of `bids` and `asks` to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            example: 4
+
+    getBookResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which the order book is returned.
+                type: string
+                example: BTC-EUR
+              nonce:
+                description: |
+                  Unique identifier of the market data snapshot. Increments by 1 with each order book update.
+
+                  <br/>
+
+                  > WS Market Data Pro `nonce` values *cannot be used* with standard WebSocket or REST APIs.
+                type: integer
+                example: 3
+                deprecated: true
+              bids:
+                type: array
+                description: |
+                  The list of buy orders for the specified `market` and `depth`. Every bid contains:
+
+                  - `price`: the offer for 1 unit of base currency in the amount of quote currency. For example, **34243** Euros.
+
+                  - `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.
+                items:
+                  type: array
+                  items:
+                    type: string
+                example:
+                  - - '4999.9'
+                    - '0.015'
+                  - - '4999.8'
+                    - '0.015'
+              asks:
+                type: array
+                description: |
+                  The list of sell orders for the specified `market` and `depth`. Every bid contains:
+
+                  - `price`: the offer for 1 unit of base currency in the amount of quote currency. For example, **34243** Euros.
+
+                  - `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.
+                items:
+                  type: array
+                  items:
+                    type: string
+                example:
+                  - - '5001.1'
+                    - '0.015'
+                  - - '5001.2'
+                    - '0.015'
+              timestamp:
+                description: The Unix timestamp in nanoseconds of the last transaction event.
+                type: integer
+                example: 1752139200000000000
+              mdSeqNo:
+                description: The sequence number of the requested order book snapshot in our system.
+                type: integer
+                example: 438524
+
+    getTickerPriceRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTickerPrice**.
+            type: string
+            example: getTickerPrice
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+
+    getTickerPriceResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTickerPrice
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which you requested the latest trade price.
+                type: string
+                example: BTC-EUR
+              price:
+                description: The latest trade price for 1 unit of base currency in the amount of quote currency for the specified `market`. For example, **34243** Euro.
+                type: string
+                example: '34243'
+
+    getTickerBookRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTickerBook**.
+            type: string
+            example: getTickerBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+
+    getTickerBookResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTickerBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which you requested the latest trade price.
+                type: string
+                example: BTC-EUR
+              bid:
+                description: The highest buy order in the quote currency for the `market` currently available on Bitvavo.
+                type: string
+                example: '4999.9'
+              bidSize:
+                description: The amount of base currency for the `bid` in the order.
+                type: string
+                example: '0.15'
+              ask:
+                description: The lowest sell order in the quote currency for the `market` currently available on Bitvavo.
+                type: string
+                example: '5003.3'
+              askSize:
+                description: The amount of base currency for the `ask` in the order.
+                type: string
+                example: '0.2'
+
+    getTradesRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTrades**.
+            type: string
+            example: getTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the trades.
+            type: string
+            example: BTC-EUR
+          limit:
+            description: The maximum number of trades to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: The Unix timestamp in milliseconds starting from which to return trades.
+            type: integer
+            example: 1751541801000
+          end:
+            description: |
+              The Unix timestamp in milliseconds until which to return trades.
+              <br/>
+              > Cannot be more than 24 hours after the `start` timestamp.
+            type: integer
+            example: 1751548920000
+          tradeIdFrom:
+            description: The unique identifier of the trade starting from which to return the trades.
+            type: string
+          tradeIdTo:
+            description: The unique identifier of the trade up to which to return the trades.
+            type: string
+
+    getTradesResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              id:
+                description: The unique identifier of the trade.
+                type: string
+                example: 57b1159b-6bf5-4cde-9e2c-6bd6a5678baf
+              timestamp:
+                description: The Unix timestamp in milliseconds when the trade was made.
+                type: integer
+                example: 1542967486256
+              amount:
+                description: The amount of base currency exchanged in the trade. For example, **0.1** Bitcoin.
+                type: string
+                example: '0.1'
+              price:
+                description: |
+                  The price of 1 unit of base currency in the amount of quote currency at the time of the trade.
+                  For example, **34243** Euro.
+                type: string
+                example: '34243'
+              side:
+                description: Indicates if the taker, who fills the order, is selling or buying.
+                type: string
+                enum: [sell, buy]
+
+    getMarketsRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **getMarkets**.
+            type: string
+            example: getMarkets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return information.
+            type: string
+            example: BTC-EUR
+
+    getMarketsResponse:
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            action:
+              description: The action performed.
+              type: string
+              example: getMarkets
+            requestId:
+              description: Your identifier for the request.
+              type: integer
+              example: 1
+            response:
+              type: object
+              properties:
+                market:
+                  description: The market for which you requested information.
+                  type: string
+                  example: BTC-EUR
+                status:
+                  description: |
+                    The [status of the market](/docs/order-lifecycle/#market-status) for which you requested information.
+                    To learn how markets in different statuses work, see [Trading Rules](https://bitvavo.com/en/trading-rules).
+                  type: string
+                  enum: [trading, halted, auction, auctionMatching, cancelOnly]
+                  example: trading
+                base:
+                  description: The base currency of the specified market.
+                  type: string
+                  example: BTC
+                quote:
+                  description: The quote currency of the specified market.
+                  type: string
+                  example: EUR
+                pricePrecision:
+                  description: The number of digits allowed in the price when the order was created.
+                  type: integer
+                  example: 5
+                  deprecated: true
+                minOrderInBaseAsset:
+                  description: The minimum amount of base currency for an order.
+                  type: string
+                  example: '0.00006100'
+                minOrderInQuoteAsset:
+                  description: The minimum amount of quote currency for an order.
+                  type: string
+                  example: '5.00'
+                maxOrderInBaseAsset:
+                  description: The maximum amount of base currency for an order.
+                  type: string
+                  example: '1000000000.00000000'
+                maxOrderInQuoteAsset:
+                  description: The maximum amount of quote currency for an order.
+                  type: string
+                  example: '1000000000.00'
+                quantityDecimals:
+                  description: The maximum number of decimals in the `amount` of an order.
+                  type: integer
+                  example: 8
+                notionalDecimals:
+                  description: The maximum number of decimal places allowed for `amountQuote` (quote currency amount).
+                  type: integer
+                  example: 2
+                tickSize:
+                  description: The minimum price increment of the market.
+                  type: string
+                  example: '0.00001'
+                maxOpenOrders:
+                  description: The maximum number of open orders allowed in a market per account.
+                  type: integer
+                  example: 100
+                feeCategory:
+                  description: The [fee category](https://bitvavo.com/en/fees) of the specified market.
+                  type: string
+                  enum: [A, B, C]
+                  example: A
+                orderTypes:
+                  description: The types of orders that can be placed in the specified market.
+                  type: array
+                  items:
+                    type: string
+                    enum: [market, limit, stopLoss, stopLossLimit, takeProfit, takeProfitLimit]
+                  example: [market, limit, stopLoss, stopLossLimit, takeProfit, takeProfitLimit]
+
+    getAssetsRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **getAssets**.
+            type: string
+            example: getAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset for which to return the information. If not specified, all supported assets are returned.
+            type: string
+            example: BTC
+
+    getAssetsResponse:
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            action:
+              description: The action performed.
+              type: string
+              example: getAssets
+            requestId:
+              description: Your identifier for the request.
+              type: integer
+              example: 1
+            response:
+              type: object
+              properties:
+                symbol:
+                  description: The asset for which the information is returned.
+                  type: string
+                  example: BTC
+                name:
+                  description: The full name of the asset.
+                  type: string
+                  example: Bitcoin
+                decimals:
+                  description: The number of decimal digits for this asset.
+                  type: integer
+                  example: 8
+                depositFee:
+                  description: The fee for depositing the asset.
+                  type: string
+                  example: '0'
+                depositConfirmations:
+                  description: The minimum number of network confirmations to credit the asset to your account.
+                  type: integer
+                  example: 10
+                depositStatus:
+                  description: The status of the asset being deposited.
+                  type: string
+                  enum: [OK, MAINTENANCE, DELISTED]
+                withdrawalFee:
+                  description: The fee for withdrawing the asset.
+                  type: string
+                  example: '0.2'
+                withdrawalMinAmount:
+                  description: The minimum amount that can be withdrawn.
+                  type: string
+                  example: '0.2'
+                withdrawalStatus:
+                  description: The status of the asset being withdrawn.
+                  type: string
+                  enum: [OK, MAINTENANCE, DELISTED]
+                networks:
+                  type: array
+                  description: The list of supported networks.
+                  items:
+                    type: string
+                  example: [Mainnet]
+                message:
+                  description: The reason if the `withdrawalStatus` or `depositStatus` is not `OK`.
+                  type: string
+                  example: ''
+
+    # =========================================================================
+    # Subscription messages
+    # =========================================================================
+
+    subscriptionRequest:
+      description: Generic subscribe/unsubscribe request for market data channels.
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                markets:
+                  description: The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    bookSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: book
+                markets:
+                  description: The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    tickerSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: ticker
+                markets:
+                  description: The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    tradesSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: trades
+                markets:
+                  description: The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    bookSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: book
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              book:
+                description: The markets for which to stream order book data.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    bookEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: book
+          market:
+            description: The market to which you subscribed.
+            type: string
+            example: BTC-EUR
+          nonce:
+            description: |
+              Unique identifier of the market data snapshot. Increments by 1 with each order book update.
+
+              <br/>
+
+              > WS Market Data Pro `nonce` values *cannot be used* with standard WebSocket or REST APIs.
+            type: integer
+            example: 438524
+            deprecated: true
+          bids:
+            description: All bids with the price and the size. Bids with size **0** are no longer available at that price.
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+            example:
+              - - '9209.3'
+                - '0.015'
+          asks:
+            description: All asks with the price and the size. Asks with size **0** are no longer available at that price.
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+            example:
+              - - '9220.2'
+                - '0.015'
+          timestamp:
+            description: The Unix timestamp in nanoseconds of the last transaction event.
+            type: integer
+            example: 1752139200000000000
+          startMdSeqNo:
+            description: Sequence number identifying the start of the range of events that the order book update includes. To learn more, see [Sync your local order book](/docs/ws-market-data-pro-sync/#sync-your-local-order-book).
+            type: integer
+            example: 438524
+          endMdSeqNo:
+            description: Sequence number identifying the end of the range of events that the order book update includes. To learn more, see [Sync your local order book](/docs/ws-market-data-pro-sync/#sync-your-local-order-book).
+            type: integer
+            example: 438524
+          type:
+            description: The type of order book update. Currently, only **update** is supported.
+            type: string
+            enum: [update]
+            example: update
+
+    tickerSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              ticker:
+                description: All markets for which to stream ticker data.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    tickerEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: ticker
+          market:
+            description: The market to which you subscribed.
+            type: string
+            example: BTC-EUR
+          bestBid:
+            description: The highest offered price for the asset.
+            type: string
+            example: '9156.8'
+          bestBidSize:
+            description: The size of the `bestBid`.
+            type: string
+            example: '0.12840531'
+          bestAsk:
+            description: The lowest asked price for the asset.
+            type: string
+            example: '9157.9'
+          bestAskSize:
+            description: The size of the `bestAsk`.
+            type: string
+            example: '0.1286605'
+          lastPrice:
+            description: The last price at which a trade occurred.
+            type: string
+            example: '9156.9'
+
+    tradesSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              trades:
+                description: The markets for which to stream trades.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    tradesEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: trade
+          id:
+            description: The unique identifier of a trade.
+            type: string
+            example: 391f4d94-485f-4fb0-b11f-39da1cfcfc2d
+          amount:
+            description: The amount of base currency exchanged in the trade.
+            type: string
+            example: '0.00096361'
+          price:
+            description: The price in quote currency for which the trade was made.
+            type: string
+            example: '9311.2'
+          timestamp:
+            description: The Unix timestamp in milliseconds of when the trade was made.
+            type: integer
+            example: 1566817150381
+          market:
+            description: The market in which the trade occurred.
+            type: string
+            example: BTC-EUR
+          side:
+            description: Indicates if the taker made the order to buy or sell an asset.
+            type: string
+            enum: [sell, buy]
+          timestampNs:
+            description: The Unix timestamp in nanoseconds of when the trade was made.
+            type: integer
+            example: 1752139200000000000

@@ -1,0 +1,210 @@
+generated: '2026-10-13'
+method: derived
+generator: derive-mcp-candidate.py
+source:
+- openapi/bitvavo-exchange-rest-openapi.yml
+- openapi/bitvavo-institutional-openapi.yml
+status: candidate
+deployment:
+  mode: none
+  auth: unknown
+  verified: probed
+note: 'No MCP server was found. The pre-flight posted tools/list to /mcp on api.bitvavo.com, bitvavo.com, docs.bitvavo.com; verdict gated (https://bitvavo.com/mcp/v1
+  answered 403: the edge authenticates before it routes, which proves nothing either way). Candidate tools below are derived from the 39 operation(s)
+  in the provider''s own OpenAPI (39 listed); they describe what a server WOULD expose, not one that exists.'
+tools:
+- name: get_book
+  operationId: GET /{market}/book
+  method: GET
+  path: /{market}/book
+  description: Get order book
+- name: create_subaccounts
+  operationId: POST /subaccounts
+  method: POST
+  path: /subaccounts
+  description: Create subaccount
+- name: get_report_book
+  operationId: GET /report/{market}/book
+  method: GET
+  path: /report/{market}/book
+  description: Get order book report
+- name: get_subaccounts
+  operationId: GET /subaccounts
+  method: GET
+  path: /subaccounts
+  description: Get subaccounts
+- name: get_trades
+  operationId: GET /{market}/trades
+  method: GET
+  path: /{market}/trades
+  description: Get trades
+- name: create_subaccounts_transfers
+  operationId: POST /subaccounts/transfers
+  method: POST
+  path: /subaccounts/transfers
+  description: Create transfer
+- name: get_report_trades
+  operationId: GET /report/{market}/trades
+  method: GET
+  path: /report/{market}/trades
+  description: Get trades report
+- name: get_subaccounts_transfers
+  operationId: GET /subaccounts/transfers
+  method: GET
+  path: /subaccounts/transfers
+  description: Get transfers
+- name: get_ticker_price
+  operationId: GET /ticker/price
+  method: GET
+  path: /ticker/price
+  description: Get ticker prices
+- name: get_subaccounts_balance
+  operationId: GET /institutional/subaccounts/balance
+  method: GET
+  path: /institutional/subaccounts/balance
+  description: Get balance
+- name: get_ticker_book
+  operationId: GET /ticker/book
+  method: GET
+  path: /ticker/book
+  description: Get ticker book
+- name: get_subaccounts_history
+  operationId: GET /institutional/subaccounts/history
+  method: GET
+  path: /institutional/subaccounts/history
+  description: Get transaction history
+- name: get_candles
+  operationId: GET /{market}/candles
+  method: GET
+  path: /{market}/candles
+  description: Get candlestick data
+- name: get_orders_open
+  operationId: GET /institutional/subaccounts/orders/open
+  method: GET
+  path: /institutional/subaccounts/orders/open
+  description: Get open orders
+- name: get_ticker_24h
+  operationId: GET /ticker/24h
+  method: GET
+  path: /ticker/24h
+  description: Get ticker data 24h
+- name: delete_subaccounts_order
+  operationId: DELETE /institutional/subaccounts/order
+  method: DELETE
+  path: /institutional/subaccounts/order
+  description: Cancel order
+- name: create_order
+  operationId: POST /order
+  method: POST
+  path: /order
+  description: Create order
+- name: delete_subaccounts_orders
+  operationId: DELETE /institutional/subaccounts/orders
+  method: DELETE
+  path: /institutional/subaccounts/orders
+  description: Cancel orders
+- name: update_order
+  operationId: PUT /order
+  method: PUT
+  path: /order
+  description: Update order
+- name: get_order
+  operationId: GET /order
+  method: GET
+  path: /order
+  description: Get order
+- name: delete_order
+  operationId: DELETE /order
+  method: DELETE
+  path: /order
+  description: Cancel order
+- name: get_ordersopen
+  operationId: GET /ordersOpen
+  method: GET
+  path: /ordersOpen
+  description: Get open orders
+- name: get_orders
+  operationId: GET /orders
+  method: GET
+  path: /orders
+  description: Get orders
+- name: delete_orders
+  operationId: DELETE /orders
+  method: DELETE
+  path: /orders
+  description: Cancel orders
+- name: delete_atomic_orders
+  operationId: DELETE /atomic/orders
+  method: DELETE
+  path: /atomic/orders
+  description: Atomic cancel orders
+- name: create_cancelordersafter
+  operationId: POST /cancelOrdersAfter
+  method: POST
+  path: /cancelOrdersAfter
+  description: Cancel orders after
+- name: get_deposit
+  operationId: GET /deposit
+  method: GET
+  path: /deposit
+  description: Get deposit data
+- name: get_deposithistory
+  operationId: GET /depositHistory
+  method: GET
+  path: /depositHistory
+  description: Get deposit history
+- name: create_withdrawal
+  operationId: POST /withdrawal
+  method: POST
+  path: /withdrawal
+  description: Withdraw assets
+- name: create_crypto_withdrawal
+  operationId: POST /crypto/withdrawal
+  method: POST
+  path: /crypto/withdrawal
+  description: Withdraw crypto assets
+- name: get_withdrawalhistory
+  operationId: GET /withdrawalHistory
+  method: GET
+  path: /withdrawalHistory
+  description: Get withdrawal history
+- name: get_account
+  operationId: GET /account
+  method: GET
+  path: /account
+  description: Get account fees
+- name: get_balance
+  operationId: GET /balance
+  method: GET
+  path: /balance
+  description: Get account balance
+- name: get_stakingbalance
+  operationId: GET /stakingBalance
+  method: GET
+  path: /stakingBalance
+  description: Get staking balance
+- name: get_account_fees
+  operationId: GET /account/fees
+  method: GET
+  path: /account/fees
+  description: Get market fees
+- name: get_account_history
+  operationId: GET /account/history
+  method: GET
+  path: /account/history
+  description: Get transaction history
+- name: get_time
+  operationId: GET /time
+  method: GET
+  path: /time
+  description: Get server time
+- name: get_markets
+  operationId: GET /markets
+  method: GET
+  path: /markets
+  description: Get markets
+- name: get_assets
+  operationId: GET /assets
+  method: GET
+  path: /assets
+  description: Get asset data

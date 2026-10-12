@@ -1,0 +1,20 @@
+generated: '2026-10-13'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/bitvavo-exchange-rest-openapi.yml
+- openapi/bitvavo-institutional-openapi.yml
+format: custom
+envelope:
+  media_type: null
+  schema: null
+coverage:
+  operations: 41
+  statuses_declared: 1
+problems:
+- status: 4XX
+  title: null
+  description: For error codes, see [Handle errors](/docs/errors).
+  operations: 39
+  media_types: []
+  schema: null

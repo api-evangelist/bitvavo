@@ -1,0 +1,12 @@
+generated: '2026-10-13'
+method: derived
+generator: derive-conformance.py
+source: openapi/ (2 document(s), 12 mutating operations)
+idempotency:
+  coverage: partial
+  scope:
+  - POST /crypto/withdrawal
+  header: idempotencyKey
+  mechanism: request header / body token declared in the OpenAPI
+  evidence: idempotencyKey on 1 of 12 mutating operations
+  verified: derived

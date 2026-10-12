@@ -1,0 +1,156 @@
+# Bitvavo API Documentation
+
+Bitvavo API docs provide spot trading, market data, transfers, and account management through REST, WebSocket, and FIX APIs. Authenticate with HMAC-SHA256 signatures — REST signs each request, WebSocket signs an authenticate message after connecting, and FIX signs the Logon message. Each API's introduction page has the signing details.
+
+## Get started
+
+- [Overview](https://docs.bitvavo.com/docs/overview/)
+- [Get started](https://docs.bitvavo.com/docs/get-started/)
+
+## Concepts
+
+- [Order lifecycle](https://docs.bitvavo.com/docs/order-lifecycle/)
+- [Manage local order book](https://docs.bitvavo.com/docs/manage-order-book/)
+- [Cancel on disconnect](https://docs.bitvavo.com/docs/cancel-on-disconnect/)
+- [Stream data with WS Market Data Pro](https://docs.bitvavo.com/docs/ws-market-data-pro-sync/)
+- [Handle errors](https://docs.bitvavo.com/docs/errors/)
+- [Rate limits](https://docs.bitvavo.com/docs/rate-limits/)
+- [Release management](https://docs.bitvavo.com/docs/release-management/)
+
+## Exchange REST API
+
+- [Introduction](https://docs.bitvavo.com/docs/rest-api/introduction/)
+- [Get order book](https://docs.bitvavo.com/docs/rest-api/get-order-book/): Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+- [Get order book report](https://docs.bitvavo.com/docs/rest-api/get-order-book-report/): Returns the list of up to 1000 bids and asks for the specified `market`, sorted by `price`.
+- [Get trades](https://docs.bitvavo.com/docs/rest-api/get-trades/): Returns the list of trades made by all Bitvavo users for the specified `market` and time period up to 24 hours.
+- [Get trades report](https://docs.bitvavo.com/docs/rest-api/get-trades-report/): Returns the list of trades from for the specified `market` and time period made by all Bitvavo users.
+- [Get ticker prices](https://docs.bitvavo.com/docs/rest-api/get-ticker-prices/): Returns prices of the latest trades on Bitvavo for all markets or a single `market`.
+- [Get ticker book](https://docs.bitvavo.com/docs/rest-api/get-ticker-book/): Returns the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+- [Get candlestick data](https://docs.bitvavo.com/docs/rest-api/get-candlestick-data/): Returns the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) market data used to create [candlestick charts](https://learn.bitvavo.com/article/what-are-candlestick-patterns/1199).
+- [Get ticker data 24h](https://docs.bitvavo.com/docs/rest-api/get-ticker-data-24-h/): Returns the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) data about trades and orders for all markets, or a single `market`, on Bitvavo during the latest 24 hours.
+- [Create order](https://docs.bitvavo.com/docs/rest-api/create-order/): Creates an order to buy or sell digital assets on Bitvavo.
+- [Update order](https://docs.bitvavo.com/docs/rest-api/update-order/): Updates an existing *limit* or *trigger* order.
+- [Get order](https://docs.bitvavo.com/docs/rest-api/get-order/): Returns information about an existing order.
+- [Cancel order](https://docs.bitvavo.com/docs/rest-api/cancel-order/): Cancels an open order.
+- [Get open orders](https://docs.bitvavo.com/docs/rest-api/get-open-orders/): Returns all current open orders.
+- [Get trade history](https://docs.bitvavo.com/docs/rest-api/get-trade-history/): Returns the specified number of past trades for your account and a time period of up to 24 hours.
+- [Get orders](https://docs.bitvavo.com/docs/rest-api/get-orders/): Returns information about multiple orders.
+- [Cancel orders](https://docs.bitvavo.com/docs/rest-api/cancel-orders/): Cancels multiple orders for the specified market or the account.
+- [Atomic cancel orders](https://docs.bitvavo.com/docs/rest-api/atomic-cancel-orders/): Cancels all open orders to buy or sell in the specified `market` as a single atomic request.
+- [Cancel orders after](https://docs.bitvavo.com/docs/rest-api/cancel-orders-after/): Creates an identifier used to group open orders and sets the countdown timer after which those orders are automatically canceled.
+- [Get deposit data](https://docs.bitvavo.com/docs/rest-api/get-deposit-data/): Returns wallet or bank account information required to deposit digital or fiat assets.
+- [Get deposit history](https://docs.bitvavo.com/docs/rest-api/get-deposit-history/): Returns all past deposits for your account.
+- [Withdraw assets](https://docs.bitvavo.com/docs/rest-api/withdraw-assets/): Request to withdraw assets to a wallet or bank account.
+- [Withdraw crypto assets](https://docs.bitvavo.com/docs/rest-api/withdraw-crypto-assets/): Request to withdraw crypto assets to a wallet over the specified network.
+- [Get withdrawal history](https://docs.bitvavo.com/docs/rest-api/get-withdrawal-history/): Returns all past withdrawals for your account.
+- [Get account fees](https://docs.bitvavo.com/docs/rest-api/get-account-fees/): Returns your current trading fees from the default [Category A](https://bitvavo.com/en/fees) based on the trading volume of your account.
+- [Get account balance](https://docs.bitvavo.com/docs/rest-api/get-account-balance/): Returns the current balance for your account.
+- [Get staking balance](https://docs.bitvavo.com/docs/rest-api/get-staking-balance/): Returns the amount of crypto assets in your account that are currently in [fixed staking positions](https://support.bitvavo.com/hc/en-us/articles/4405243949841-Staking-at-Bitvavo) and are not available for trading.
+- [Get market fees](https://docs.bitvavo.com/docs/rest-api/get-market-fees/): Returns your current trading fees from the [Category](https://bitvavo.com/en/fees) of the specified market based on the trading volume of your account.
+- [Get transaction history](https://docs.bitvavo.com/docs/rest-api/get-transaction-history/): Returns a list of past transactions for your account or the specified date range.
+- [Get server time](https://docs.bitvavo.com/docs/rest-api/get-server-time/): Returns the current Unix timestamp of Bitvavo servers.
+- [Get markets](https://docs.bitvavo.com/docs/rest-api/get-markets/): Returns the information about one or all markets on Bitvavo.
+- [Get asset data](https://docs.bitvavo.com/docs/rest-api/get-asset-data/): Returns the information about the specified assets.
+
+## Exchange WebSocket API
+
+- [Introduction](https://docs.bitvavo.com/docs/websocket-api/introduction/)
+- [Get order book](https://docs.bitvavo.com/docs/websocket-api/get-order-book/): Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+- [Get trades](https://docs.bitvavo.com/docs/websocket-api/get-trades/): Returns the list of trades made by all Bitvavo users for the specified `market` and time period up to 24 hours.
+- [Get ticker prices](https://docs.bitvavo.com/docs/websocket-api/get-ticker-prices/): Returns prices of the latest trades on Bitvavo for all markets or a single `market`.
+- [Get ticker book](https://docs.bitvavo.com/docs/websocket-api/get-ticker-book/): Stream the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+- [Get candlestick data](https://docs.bitvavo.com/docs/websocket-api/get-candlestick-data/): Returns the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) market data used to create [candlestick charts](https://learn.bitvavo.com/article/what-are-candlestick-patterns/1199).
+- [Get ticker data 24h](https://docs.bitvavo.com/docs/websocket-api/get-ticker-data-24-h/): Streams the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) data about trades and orders for all markets, or a single `market`, on Bitvavo during the latest 24 hours.
+- [Create order](https://docs.bitvavo.com/docs/websocket-api/create-order/): Creates an order to buy or sell digital assets on Bitvavo.
+- [Update order](https://docs.bitvavo.com/docs/websocket-api/update-order/): Updates an existing *limit* or *trigger* order.
+- [Get order](https://docs.bitvavo.com/docs/websocket-api/get-order/): Returns information about an existing order.
+- [Cancel order](https://docs.bitvavo.com/docs/websocket-api/cancel-order/): Cancels an open order.
+- [Get open orders](https://docs.bitvavo.com/docs/websocket-api/get-open-orders/): Returns all current open orders.
+- [Get trade history](https://docs.bitvavo.com/docs/websocket-api/get-trade-history/): Returns the specified number of past trades for your account and a time period of up to 24 hours.
+- [Get orders](https://docs.bitvavo.com/docs/websocket-api/get-orders/): Returns information about multiple orders.
+- [Cancel orders](https://docs.bitvavo.com/docs/websocket-api/cancel-orders/): Cancels multiple orders for the specified market or the account.
+- [Atomic cancel orders](https://docs.bitvavo.com/docs/websocket-api/atomic-cancel-orders/): Cancels all open orders to buy or sell in the specified `market` as a single atomic request.
+- [Cancel orders after](https://docs.bitvavo.com/docs/websocket-api/cancel-orders-after/): Creates an identifier used to group open orders and sets the countdown timer after which those orders are automatically canceled.
+- [Get deposit data](https://docs.bitvavo.com/docs/websocket-api/get-deposit-data/): Returns wallet or bank account information required to deposit digital or fiat assets.
+- [Get deposit history](https://docs.bitvavo.com/docs/websocket-api/get-deposit-history/): Returns all past deposits for your account.
+- [Withdraw assets](https://docs.bitvavo.com/docs/websocket-api/withdraw-assets/): Request to withdraw assets to a wallet or bank account.
+- [Withdraw crypto assets](https://docs.bitvavo.com/docs/websocket-api/withdraw-crypto-assets/): Request to withdraw crypto assets to a wallet over the specified network.
+- [Get withdrawal history](https://docs.bitvavo.com/docs/websocket-api/get-withdrawal-history/): Returns all past withdrawals for your account.
+- [Get account fees](https://docs.bitvavo.com/docs/websocket-api/get-account-fees/): Returns your current trading fees from the default [Category A](https://bitvavo.com/en/fees) based on the trading volume of your account.
+- [Get account balance](https://docs.bitvavo.com/docs/websocket-api/get-account-balance/): Returns the current balance for your account.
+- [Get market fees](https://docs.bitvavo.com/docs/websocket-api/get-market-fees/): Returns your current trading fees from the [Category](https://bitvavo.com/en/fees) of the specified market based on the trading volume of your account.
+- [Get transaction history](https://docs.bitvavo.com/docs/websocket-api/get-transaction-history/): Returns a list of past transactions for your account or the specified date range.
+- [Get server time](https://docs.bitvavo.com/docs/websocket-api/get-server-time/): Returns the current Unix timestamp of Bitvavo servers.
+- [Get markets](https://docs.bitvavo.com/docs/websocket-api/get-markets/): Returns the information about one or all markets on Bitvavo.
+- [Get asset data](https://docs.bitvavo.com/docs/websocket-api/get-asset-data/): Returns the information about the specified assets.
+- [Ticker subscription](https://docs.bitvavo.com/docs/websocket-api/ticker-subscription/): Subscribes to ticker events which return an object every time the best bid or ask changes.
+- [Ticker 24 hour subscription](https://docs.bitvavo.com/docs/websocket-api/ticker-24-hour-subscription/): Subscribes to ticker24h events.
+- [Candles subscription](https://docs.bitvavo.com/docs/websocket-api/candles-subscription/): Subscribes to events that return data used to form candlestick charts.
+- [Trades subscription](https://docs.bitvavo.com/docs/websocket-api/trades-subscription/): Subscribes to events that return data when a trade is made.
+- [Book subscription](https://docs.bitvavo.com/docs/websocket-api/book-subscription/): Subscribes to events that return data when there is a change in the order book.
+- [Track your orders](https://docs.bitvavo.com/docs/websocket-api/track-your-orders/): Subscribes to events that return data when your orders in the specified market are updated.
+
+## Market Data Pro WebSocket API
+
+- [Introduction](https://docs.bitvavo.com/docs/ws-market-data-pro-api/introduction/)
+- [Get order book](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-order-book/): Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+- [Get ticker prices](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-ticker-prices/): Returns prices of the latest trades on Bitvavo for all markets or a single `market`.
+- [Get ticker book](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-ticker-book/): Stream the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+- [Get trades](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-trades/): Returns trades for the specified `market` and time period made by all Bitvavo users.
+- [Get markets](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-markets/): Returns the information about one or all markets on Bitvavo.
+- [Get asset data](https://docs.bitvavo.com/docs/ws-market-data-pro-api/get-asset-data/): Returns the information about the specified assets.
+- [Book subscription](https://docs.bitvavo.com/docs/ws-market-data-pro-api/book-subscription/): Subscribes to events that return data when there is a change in the order book.
+- [Ticker subscription](https://docs.bitvavo.com/docs/ws-market-data-pro-api/ticker-subscription/): Subscribes to ticker events which return an object every time the best bid or ask changes.
+- [Trades subscription](https://docs.bitvavo.com/docs/ws-market-data-pro-api/trades-subscription/): Subscribes to events that return data when a trade is made.
+
+## Institutional REST API
+
+- [Introduction](https://docs.bitvavo.com/docs/institutional-api/introduction/)
+- [Create subaccount](https://docs.bitvavo.com/docs/institutional-api/create-subaccount/): Creates a new subaccount under the main account.
+- [Get subaccounts](https://docs.bitvavo.com/docs/institutional-api/get-subaccounts/): Retrieves the list of all subaccounts under the main account.
+- [Create transfer](https://docs.bitvavo.com/docs/institutional-api/create-transfer/): Makes a deposit or withdrawal by creating a transfer of assets between your subaccounts and the main account.
+- [Get transfers](https://docs.bitvavo.com/docs/institutional-api/get-transfers/): Returns information about multiple transfers of assets between a subaccount and your main account.
+- [Get transfer](https://docs.bitvavo.com/docs/institutional-api/get-transfer/): Returns information about a transfer of assets between a subaccount and your main account.
+- [Get balance](https://docs.bitvavo.com/docs/institutional-api/get-balance/): Returns the current balance for the specified subaccount.
+- [Get transaction history](https://docs.bitvavo.com/docs/institutional-api/get-transaction-history/): Returns a list of past transactions for the specified subaccount or the specified date range.
+- [Get open orders](https://docs.bitvavo.com/docs/institutional-api/get-open-orders/): Returns all current open orders for the specified subaccount.
+- [Cancel order](https://docs.bitvavo.com/docs/institutional-api/cancel-order/): Cancels a single open order for the specified subaccount.
+- [Cancel orders](https://docs.bitvavo.com/docs/institutional-api/cancel-orders/): Cancels multiple orders for the specified subaccount or market.
+
+## FIX API
+
+- [Introduction](https://docs.bitvavo.com/docs/fix-api/introduction/): [Financial Information eXchange](https://en.wikipedia.org/wiki/Financial_Information_eXchange) (FIX) is a standard protocol for entering orders, managing positions, and receiving trade confirmations.
+- [Message structure](https://docs.bitvavo.com/docs/fix-api/message-structure/): Every FIX message consists of three main components that define its structure and content:
+- [Logon (35=A)](https://docs.bitvavo.com/docs/fix-api/logon/): Authenticates and opens a FIX session.
+- [Logout (35=5)](https://docs.bitvavo.com/docs/fix-api/logout/): Closes a FIX session.
+- [Heartbeat (35=0)](https://docs.bitvavo.com/docs/fix-api/heartbeat/): Periodic message that confirms that the FIX session is active.
+- [Reject (35=3)](https://docs.bitvavo.com/docs/fix-api/reject/): Sent when a message violates session-level rules and cannot be processed.
+- [ResendRequest (35=2)](https://docs.bitvavo.com/docs/fix-api/resend-request/): Request to the other side to resend missed messages when a sequence gap is detected or when initiating a session.
+- [TestRequest (35=1)](https://docs.bitvavo.com/docs/fix-api/test-request/): Request to the other side to send a [Heartbeat](/docs/fix-api/heartbeat/) so you can confirm the connection is working.
+- [SequenceReset (35=4)](https://docs.bitvavo.com/docs/fix-api/sequence-reset/): Resets the inbound or outbound sequence numbers in a session.
+- [NewOrderSingle (35=D)](https://docs.bitvavo.com/docs/fix-api/new-order-single/): Creates a new order to buy or sell a digital asset on Bitvavo.
+- [OrderCancelReplaceRequest (35=G)](https://docs.bitvavo.com/docs/fix-api/order-cancel-replace-request/): Updates an existing limit or trigger order to buy or sell digital assets on Bitvavo.
+- [OrderCancelRequest (35=F)](https://docs.bitvavo.com/docs/fix-api/order-cancel-request/): Cancels an open order to buy or sell a digital asset on Bitvavo.
+- [OrderMassCancelRequest (35=q)](https://docs.bitvavo.com/docs/fix-api/order-mass-cancel-request/): Cancels multiple open orders to buy or sell a digital asset on Bitvavo.
+- [OrderStatusRequest (35=H)](https://docs.bitvavo.com/docs/fix-api/order-status-request/): Retrieves details of an open order to buy or sell a digital asset on Bitvavo.
+- [OrderMassStatusRequest (35=AF)](https://docs.bitvavo.com/docs/fix-api/order-mass-status-request/): Returns the details of all open orders for a specific market or the account.
+- [BusinessMessageReject (35=j)](https://docs.bitvavo.com/docs/fix-api/business-message-reject/): Sent by Bitvavo when your message is rejected because of a failure in business logic or invalid message structure.
+- [OrderMassCancelReport (35=r)](https://docs.bitvavo.com/docs/fix-api/order-mass-cancel-report/): Sent by Bitvavo in response to your mass cancellation request.
+- [ExecutionReport (35=8)](https://docs.bitvavo.com/docs/fix-api/execution-report/): Returns information about the status of orders, order changes, fills, and rejections.
+- [OrderCancelReject (35=9)](https://docs.bitvavo.com/docs/fix-api/order-cancel-reject/): Sent by Bitvavo when your request to cancel or replace an order is rejected.
+
+## FAQs
+
+- [Frequently asked questions](https://docs.bitvavo.com/docs/faqs/)
+
+## Releases
+
+- [Releases changelog](https://docs.bitvavo.com/releases/)
+
+## API specification
+
+- [exchange-rest-api.yaml](https://docs.bitvavo.com/api-specs/exchange-rest-api.yaml)
+- [exchange-websocket-api.yaml](https://docs.bitvavo.com/api-specs/exchange-websocket-api.yaml)
+- [ws-market-data-pro-api.yaml](https://docs.bitvavo.com/api-specs/ws-market-data-pro-api.yaml)
+- [institutional-api.yaml](https://docs.bitvavo.com/api-specs/institutional-api.yaml)
+- [2026-04-28.fix.xml](https://docs.bitvavo.com/api-specs/2026-04-28.fix.xml)

@@ -1,0 +1,44 @@
+generated: '2026-10-13'
+method: derived
+source: openapi/bitvavo-exchange-rest-openapi.yml, openapi/bitvavo-institutional-openapi.yml
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: Bitvavo-Access-Key
+  type: apiKey
+  in: header
+  parameter: Bitvavo-Access-Key
+  description: Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+  sources:
+  - openapi/bitvavo-exchange-rest-openapi.yml
+  - openapi/bitvavo-institutional-openapi.yml
+- name: Bitvavo-Access-Timestamp
+  type: apiKey
+  in: header
+  parameter: Bitvavo-Access-Timestamp
+  description: A Unix timestamp in milliseconds of the time when you make the request.
+  sources:
+  - openapi/bitvavo-exchange-rest-openapi.yml
+  - openapi/bitvavo-institutional-openapi.yml
+- name: Bitvavo-Access-Signature
+  type: apiKey
+  in: header
+  parameter: Bitvavo-Access-Signature
+  description: An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters
+    used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+  sources:
+  - openapi/bitvavo-exchange-rest-openapi.yml
+  - openapi/bitvavo-institutional-openapi.yml
+- name: Bitvavo-Access-Window
+  type: apiKey
+  in: header
+  parameter: Bitvavo-Access-Window
+  description: |-
+    The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+    is 10000, the maximum value is 60000.
+  sources:
+  - openapi/bitvavo-exchange-rest-openapi.yml
+  - openapi/bitvavo-institutional-openapi.yml

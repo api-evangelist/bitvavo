@@ -1,23 +1,120 @@
 aid: bitvavo
+
 name: Bitvavo
-description: 'Bitvavo is a company surfaced via the API Evangelist harvest backlog (source: market-gap)
-  and added to the network as a stub for full-pipeline profiling.'
+
+description: Bitvavo is a Netherlands-based European cryptocurrency exchange. It publishes a REST API, a WebSocket API, a Market Data Pro WebSocket API, an Institutional API and a FIX API for spot trading, market data, transfers and account management, authenticated with HMAC-SHA256 signed requests.
+
 url: https://raw.githubusercontent.com/api-evangelist/bitvavo/refs/heads/main/apis.yml
+
 x-type: company
+
 x-source: harvest:market-gap
-x-tier: stub
-x-tier-reason: harvest
+
 specificationVersion: '0.20'
+
 created: '2026-10-13'
+
 modified: '2026-10-13'
+
 tags:
 - Company
-apis: []
+- Cryptocurrency
+- Exchange
+- Trading
+- Market Data
+- Netherlands
+
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+
 common:
+- type: AgenticAccess
+  url: agentic-access/bitvavo-agentic-access.yml
+- type: Spectral
+  url: rules/bitvavo-rules.yml
+- type: Vocabulary
+  url: vocabulary/bitvavo-vocabulary.yml
+- type: Idempotency
+  url: conventions/bitvavo-conventions.yml
+- type: Conventions
+  url: conventions/bitvavo-conventions.yml
+- type: ErrorCatalog
+  url: errors/bitvavo-problem-types.yml
+- type: Conformance
+  url: conformance/bitvavo-conformance.yml
+- type: SecurityTxt
+  url: well-known/bitvavo-www-security.txt
+- type: WellKnown
+  url: well-known/bitvavo-well-known.yml
+- type: Hosts
+  url: hosts/bitvavo-hosts.yml
+- type: Vendors
+  url: vendors/bitvavo-vendors.yml
+- type: SDKs
+  url: packages/bitvavo-packages.yml
+- type: Packages
+  url: packages/bitvavo-packages.yml
+- type: APIReference
+  url: https://docs.bitvavo.com/llms.txt
+- type: GitHubOrganization
+  url: https://github.com/bitvavo
+- type: Authentication
+  url: authentication/bitvavo-authentication.yml
 - type: Website
   url: https://bitvavo.com
+- type: Documentation
+  url: https://docs.bitvavo.com/
+- type: LLMsTxt
+  url: llms/bitvavo-llms.txt
+- type: Portal
+  url: https://account.bitvavo.com/user/api
+- type: DomainSecurity
+  url: security/bitvavo-domain-security.yml
+
+apis:
+- aid: bitvavo:exchange-rest-api
+  name: Bitvavo REST API
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags: [Trading, Market Data, Cryptocurrency]
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-exchange-rest-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:institutional-api
+  name: Bitvavo Institutional API
+  description: Institutional API published by Bitvavo on docs.bitvavo.com.
+  humanURL: https://docs.bitvavo.com/
+  tags: [Institutional, Cryptocurrency]
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-institutional-openapi.yml
+- aid: bitvavo:websocket-api
+  name: Bitvavo WebSocket API
+  description: Real-time WebSocket API for market data, trading, transfers, and account management on Bitvavo.
+  humanURL: https://docs.bitvavo.com/
+  tags: [WebSocket, Trading, Market Data]
+  properties:
+  - type: AsyncAPI
+    url: asyncapi/bitvavo-exchange-websocket-asyncapi.yml
+- aid: bitvavo:market-data-pro-api
+  name: Bitvavo Market Data Pro WebSocket API
+  description: Market Data Pro WebSocket API published by Bitvavo.
+  humanURL: https://docs.bitvavo.com/
+  tags: [WebSocket, Market Data]
+  properties:
+  - type: AsyncAPI
+    url: asyncapi/bitvavo-market-data-pro-asyncapi.yml
+- aid: bitvavo:fix-api
+  name: Bitvavo FIX API
+  description: FIX protocol API; the FIX dictionary is published at docs.bitvavo.com/api-specs/2026-04-28.fix.xml.
+  humanURL: https://docs.bitvavo.com/
+  tags: [FIX, Trading]
+  properties:
+  - type: Documentation
+    url: https://docs.bitvavo.com/api-specs/2026-04-28.fix.xml

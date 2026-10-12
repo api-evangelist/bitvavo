@@ -1,0 +1,16 @@
+generated: '2026-10-13'
+method: none
+source:
+- https://zapier.com/apps/bitvavo/integrations
+- https://n8n.io/integrations/bitvavo/
+- https://composio.dev/toolkits/bitvavo
+- https://monid.ai/tools/bitvavo
+checked:
+- https://composio.dev/toolkits/bitvavo
+- https://monid.ai/tools/bitvavo
+- https://n8n.io/integrations/bitvavo/
+- https://zapier.com/apps/bitvavo/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []

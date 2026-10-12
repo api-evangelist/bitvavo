@@ -1,0 +1,23 @@
+generated: '2026-10-13'
+method: derived
+generator: derive-conformance.py
+source: openapi/ (2 document(s), 12 mutating operations)
+standards:
+- id: openapi-3.0
+  conforms: true
+  evidence: the document declares 3.0.2
+- id: oauth2
+  conforms: false
+  evidence: 'securitySchemes: Bitvavo-Access-Key (apiKey), Bitvavo-Access-Signature (apiKey), Bitvavo-Access-Timestamp (apiKey), Bitvavo-Access-Window
+    (apiKey)'
+- id: rfc9457
+  conforms: false
+  evidence: no response declares application/problem+json
+- id: idempotency
+  conforms: true
+  evidence: idempotencyKey declared on 1 of 12 mutating operations (partial)
+- id: pagination
+  conforms: true
+  evidence: list operations take limit, page
+note: 'Derived from the provider''s own OpenAPI only: what the contract declares. Claims the contract cannot carry (PCI DSS, SOC 2, FAPI, ISO
+  20022) come from the documentation reader and are merged below when found.'

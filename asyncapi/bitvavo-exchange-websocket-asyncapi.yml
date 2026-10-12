@@ -1,0 +1,4292 @@
+asyncapi: 3.0.0
+
+info:
+  title: Bitvavo WebSocket API
+  version: 2.10.0
+  description: |
+    Real-time WebSocket API for market data, trading, transfers, and account management on Bitvavo.
+
+servers:
+  production:
+    host: ws.bitvavo.com
+    pathname: /v2
+    protocol: wss
+
+operations:
+
+  # ---------------------------------------------------------------------------
+  # Market data
+  # ---------------------------------------------------------------------------
+
+  getBook:
+    action: send
+    channel:
+      $ref: '#/channels/getBook'
+    summary: Get order book
+    description: |
+      Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getBookReply'
+
+  getTrades:
+    action: send
+    channel:
+      $ref: '#/channels/getTrades'
+    summary: Get trades
+    description: |
+      Returns the list of trades made by all Bitvavo users for the specified `market` and time period up to 24 hours. 
+
+      The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest.
+
+      **Rate limit weight points**: 5
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getTradesReply'
+
+  getTickerPrice:
+    action: send
+    channel:
+      $ref: '#/channels/getTickerPrice'
+    summary: Get ticker prices
+    description: |
+      Returns prices of the latest trades on Bitvavo for all markets or a single `market`. 
+
+      :::info
+      A _tick_ in a market is any change in the price of a digital asset.
+      :::
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getTickerPriceReply'
+
+  getTickerBook:
+    action: send
+    channel:
+      $ref: '#/channels/getTickerBook'
+    summary: Get ticker book
+    description: |
+      Stream the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getTickerBookReply'
+
+  getCandles:
+    action: send
+    channel:
+      $ref: '#/channels/getCandles'
+    summary: Get candlestick data
+    description: |
+      Returns the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) market data used to create [candlestick charts](https://learn.bitvavo.com/article/what-are-candlestick-patterns/1199).
+
+      Candlestick data is always returned in chronological order from the latest to the earliest. Data is returned when trades are made in the `interval` represented by that candlestick. If no trades occur you see a gap in data flow - zero trades are represented by zero candlesticks.
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getCandlesReply'
+
+  getTicker24h:
+    action: send
+    channel:
+      $ref: '#/channels/getTicker24h'
+    summary: Get ticker data 24h
+    description: |
+      Streams the [OHLCV](https://www.investopedia.com/terms/o/ohlcchart.asp) data about trades and orders for all markets, or a single `market`, on Bitvavo during the latest 24 hours.
+
+      **Rate limit weight points**: **25** (without `market`) or **1** (with `market`).
+    tags:
+      - name: Market data
+    reply:
+      channel:
+        $ref: '#/channels/getTicker24hReply'
+
+  # ---------------------------------------------------------------------------
+  # Trading
+  # ---------------------------------------------------------------------------
+
+  privateCreateOrder:
+    action: send
+    channel:
+      $ref: '#/channels/privateCreateOrder'
+    summary: Create order
+    description: |
+      Creates an order to buy or sell digital assets on Bitvavo.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::warning
+      You can have a maximum of [100 open orders](/docs/rest-api/get-orders) at any one time in each `market`. 
+      ::::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateCreateOrderReply'
+
+  privateUpdateOrder:
+    action: send
+    channel:
+      $ref: '#/channels/privateUpdateOrder'
+    summary: Update order
+    description: |
+      Updates an existing *limit* or *trigger* order.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::info
+      You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+      :::
+
+      :::tip
+      Updating an order is faster than canceling and creating new orders. During the update, your order is briefly removed from the order book.
+      :::
+
+      **Rate limit weight points**: 1
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateUpdateOrderReply'
+
+  privateGetOrder:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetOrder'
+    summary: Get order
+    description: |
+      Returns information about an existing order.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::info
+      You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetOrderReply'
+
+  privateCancelOrder:
+    action: send
+    channel:
+      $ref: '#/channels/privateCancelOrder'
+    summary: Cancel order
+    description: |
+      Cancels an open order.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::info
+      You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateCancelOrderReply'
+
+  privateGetOrdersOpen:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetOrdersOpen'
+    summary: Get open orders
+    description: |
+      Returns all current open orders.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **100** (without `market`) or **5** (with `market`).
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetOrdersOpenReply'
+
+  privateGetTrades:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetTrades'
+    summary: Get trade history
+    description: |
+      Returns the specified number of past trades for your account and a time period of up to 24 hours. Does not return trades with a Price Guarantee. 
+
+      The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::tip
+      To get a specific list of trades, use the `start`, `end`, `tradeIdFrom`, and `tradeIdTo` parameters.
+      ::::
+
+      :::tip
+      To get all past transactions for your account, use the [privateGetTransactionHistory](/docs/websocket-api/get-transaction-history/) message.
+      ::::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetTradesReply'
+
+  privateGetOrders:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetOrders'
+    summary: Get orders
+    description: |
+      Returns information about multiple orders.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetOrdersReply'
+
+  privateCancelOrders:
+    action: send
+    channel:
+      $ref: '#/channels/privateCancelOrders'
+    summary: Cancel orders
+    description: |
+      Cancels multiple orders for the specified market or the account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **100** (without `market`) or **25** (with `market`).
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateCancelOrdersReply'
+
+  privateAtomicCancelOrders:
+    action: send
+    channel:
+      $ref: '#/channels/privateAtomicCancelOrders'
+    summary: Atomic cancel orders
+    description: |
+      Cancels all open orders to buy or sell in the specified `market` as a single atomic request. The request is processed in strict arrival order and executed without interleaving with other operations.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **100**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateAtomicCancelOrdersReply'
+
+  privateCancelOrdersAfter:
+    action: send
+    channel:
+      $ref: '#/channels/privateCancelOrdersAfter'
+    summary: Cancel orders after
+    description: |
+      Creates an identifier used to group open orders and sets the countdown timer after which those orders are automatically canceled.
+
+      To learn how to use this endpoint, see [Cancel on disconnect](/docs/cancel-on-disconnect/).
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::info
+      You can create only one group. If you need to create multiple groups, reach out to your Bitvavo contact to enable this.
+      :::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Trading
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateCancelOrdersAfterReply'
+
+  # ---------------------------------------------------------------------------
+  # Transfer
+  # ---------------------------------------------------------------------------
+
+  privateDepositAssets:
+    action: send
+    channel:
+      $ref: '#/channels/privateDepositAssets'
+    summary: Get deposit data
+    description: |
+      Returns wallet or bank account information required to deposit digital or fiat assets.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Transfer
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateDepositAssetsReply'
+
+  privateGetDepositHistory:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetDepositHistory'
+    summary: Get deposit history
+    description: |
+      Returns all past deposits for your account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Transfer
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetDepositHistoryReply'
+
+  privateWithdrawAssets:
+    action: send
+    channel:
+      $ref: '#/channels/privateWithdrawAssets'
+    summary: Withdraw assets
+    description: |
+      Request to withdraw assets to a wallet or bank account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      :::warning
+      2FA and address confirmation by email are disabled for withdrawals using the API.
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Transfer
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateWithdrawAssetsReply'
+
+  privateCryptoWithdrawal:
+    action: send
+    channel:
+      $ref: '#/channels/privateCryptoWithdrawal'
+    summary: Withdraw crypto assets
+    description: |
+      Request to withdraw crypto assets to a wallet over the specified network.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **25**
+    tags:
+      - name: Transfer
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateCryptoWithdrawalReply'
+
+  privateGetWithdrawalHistory:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetWithdrawalHistory'
+    summary: Get withdrawal history
+    description: |
+      Returns all past withdrawals for your account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Transfer
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetWithdrawalHistoryReply'
+
+  # ---------------------------------------------------------------------------
+  # Account
+  # ---------------------------------------------------------------------------
+
+  privateGetAccount:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetAccount'
+    summary: Get account fees
+    description: |
+      Returns your current trading fees from the default [Category A](https://bitvavo.com/en/fees) based on the trading volume of your account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Account
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetAccountReply'
+
+  privateGetBalance:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetBalance'
+    summary: Get account balance
+    description: |
+      Returns the current balance for your account.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **5**
+    tags:
+      - name: Account
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetBalanceReply'
+
+  privateGetFees:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetFees'
+    summary: Get market fees
+    description: |
+      Returns your current trading fees from the [Category](https://bitvavo.com/en/fees) of the specified market based on the trading volume of your account. 
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Account
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetFeesReply'
+
+  privateGetTransactionHistory:
+    action: send
+    channel:
+      $ref: '#/channels/privateGetTransactionHistory'
+    summary: Get transaction history
+    description: |
+      Returns a list of past transactions for your account or the specified date range. If the range is not specified, returns all past transactions.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Account
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/privateGetTransactionHistoryReply'
+
+  # ---------------------------------------------------------------------------
+  # Synchronization
+  # ---------------------------------------------------------------------------
+
+  getTime:
+    action: send
+    channel:
+      $ref: '#/channels/getTime'
+    summary: Get server time
+    description: |
+      Returns the current Unix timestamp of Bitvavo servers.
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Synchronization
+    reply:
+      channel:
+        $ref: '#/channels/getTimeReply'
+
+  getMarkets:
+    action: send
+    channel:
+      $ref: '#/channels/getMarkets'
+    summary: Get markets
+    description: |
+      Returns the information about one or all markets on Bitvavo.
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Synchronization
+    reply:
+      channel:
+        $ref: '#/channels/getMarketsReply'
+
+  getAssets:
+    action: send
+    channel:
+      $ref: '#/channels/getAssets'
+    summary: Get asset data
+    description: |
+      Returns the information about the specified assets. 
+
+      **Rate limit weight points**: **1**
+    tags:
+      - name: Synchronization
+    reply:
+      channel:
+        $ref: '#/channels/getAssetsReply'
+
+  # ---------------------------------------------------------------------------
+  # Market data subscriptions
+  # ---------------------------------------------------------------------------
+
+  subscribeToTicker:
+    action: send
+    channel:
+      $ref: '#/channels/tickerSubscription'
+    summary: Ticker subscription
+    description: |
+      Subscribes to ticker events which return an object every time the best bid or ask changes.
+    tags:
+      - name: Market data subscription
+    reply:
+      channel:
+        $ref: '#/channels/tickerEvents'
+
+  subscribeToTicker24h:
+    action: send
+    channel:
+      $ref: '#/channels/ticker24hSubscription'
+    summary: Ticker 24 hour subscription
+    description: |
+      Subscribes to ticker24h events. Every second, it returns an object with the best bids and asks in the last 24 hours.
+    tags:
+      - name: Market data subscription
+    reply:
+      channel:
+        $ref: '#/channels/ticker24hEvents'
+
+  subscribeToCandles:
+    action: send
+    channel:
+      $ref: '#/channels/candlesSubscription'
+    summary: Candles subscription
+    description: |
+      Subscribes to events that return data used to form candlestick charts.
+    tags:
+      - name: Market data subscription
+    reply:
+      channel:
+        $ref: '#/channels/candlesEvents'
+
+  subscribeToTrades:
+    action: send
+    channel:
+      $ref: '#/channels/tradesSubscription'
+    summary: Trades subscription
+    description: |
+      Subscribes to events that return data when a trade is made.
+    tags:
+      - name: Market data subscription
+    reply:
+      channel:
+        $ref: '#/channels/tradesEvents'
+
+  subscribeToBook:
+    action: send
+    channel:
+      $ref: '#/channels/bookSubscription'
+    summary: Book subscription
+    description: |
+      Subscribes to events that return data when there is a change in the order book.
+    tags:
+      - name: Market data subscription
+    reply:
+      channel:
+        $ref: '#/channels/bookEvents'
+
+  # ---------------------------------------------------------------------------
+  # Trading data subscriptions
+  # ---------------------------------------------------------------------------
+
+  subscribeToAccount:
+    action: send
+    channel:
+      $ref: '#/channels/accountSubscription'
+    summary: Track your orders
+    description: |
+      Subscribes to events that return data when your orders in the specified market are updated.
+
+      You can receive one of the following events:
+      - **Subscribe**: receive a confirmation that you subscribed to the channel.
+      - **Order**: receive data about all orders you created or updated.
+      - **Fill**: receive data about all fills or trades executed for an orders you created.
+
+      :::info
+      *Authentication required*. To send messages, you need to [authenticate connection](/docs/websocket-api/introduction/).
+      :::
+    tags:
+      - name: Trading data subscription
+    security:
+      - $ref: '#/components/securitySchemes/websocketAuth'
+    reply:
+      channel:
+        $ref: '#/channels/accountEvents'
+
+# =============================================================================
+# Channels
+# =============================================================================
+
+channels:
+
+  # --- Market data request/reply channels ---
+
+  getBook:
+    messages:
+      getBookRequest:
+        $ref: '#/components/messages/getBookRequest'
+  getBookReply:
+    messages:
+      getBookResponse:
+        $ref: '#/components/messages/getBookResponse'
+
+  getTrades:
+    messages:
+      getTradesRequest:
+        $ref: '#/components/messages/getTradesRequest'
+  getTradesReply:
+    messages:
+      getTradesResponse:
+        $ref: '#/components/messages/getTradesResponse'
+
+  getTickerPrice:
+    messages:
+      getTickerPriceRequest:
+        $ref: '#/components/messages/getTickerPriceRequest'
+  getTickerPriceReply:
+    messages:
+      getTickerPriceResponse:
+        $ref: '#/components/messages/getTickerPriceResponse'
+
+  getTickerBook:
+    messages:
+      getTickerBookRequest:
+        $ref: '#/components/messages/getTickerBookRequest'
+  getTickerBookReply:
+    messages:
+      getTickerBookResponse:
+        $ref: '#/components/messages/getTickerBookResponse'
+
+  getCandles:
+    messages:
+      getCandlesRequest:
+        $ref: '#/components/messages/getCandlesRequest'
+  getCandlesReply:
+    messages:
+      getCandlesResponse:
+        $ref: '#/components/messages/getCandlesResponse'
+
+  getTicker24h:
+    messages:
+      getTicker24hRequest:
+        $ref: '#/components/messages/getTicker24hRequest'
+  getTicker24hReply:
+    messages:
+      getTicker24hResponse:
+        $ref: '#/components/messages/getTicker24hResponse'
+
+  # --- Trading request/reply channels ---
+
+  privateCreateOrder:
+    messages:
+      privateCreateOrderRequest:
+        $ref: '#/components/messages/privateCreateOrderRequest'
+  privateCreateOrderReply:
+    messages:
+      privateCreateOrderResponseFull:
+        $ref: '#/components/messages/orderResponseFull'
+      privateCreateOrderResponseMinimal:
+        $ref: '#/components/messages/orderResponseMinimal'
+
+  privateUpdateOrder:
+    messages:
+      privateUpdateOrderRequest:
+        $ref: '#/components/messages/privateUpdateOrderRequest'
+  privateUpdateOrderReply:
+    messages:
+      privateUpdateOrderResponseFull:
+        $ref: '#/components/messages/orderResponseFull'
+      privateUpdateOrderResponseMinimal:
+        $ref: '#/components/messages/orderResponseMinimal'
+
+  privateGetOrder:
+    messages:
+      privateGetOrderRequest:
+        $ref: '#/components/messages/privateGetOrderRequest'
+  privateGetOrderReply:
+    messages:
+      privateGetOrderResponse:
+        $ref: '#/components/messages/orderResponseFull'
+
+  privateCancelOrder:
+    messages:
+      privateCancelOrderRequest:
+        $ref: '#/components/messages/privateCancelOrderRequest'
+  privateCancelOrderReply:
+    messages:
+      privateCancelOrderResponse:
+        $ref: '#/components/messages/privateCancelOrderResponse'
+
+  privateGetOrdersOpen:
+    messages:
+      privateGetOrdersOpenRequest:
+        $ref: '#/components/messages/privateGetOrdersOpenRequest'
+  privateGetOrdersOpenReply:
+    messages:
+      privateGetOrdersOpenResponse:
+        $ref: '#/components/messages/orderResponseFull'
+
+  privateGetTrades:
+    messages:
+      privateGetTradesRequest:
+        $ref: '#/components/messages/privateGetTradesRequest'
+  privateGetTradesReply:
+    messages:
+      privateGetTradesResponse:
+        $ref: '#/components/messages/privateGetTradesResponse'
+
+  privateGetOrders:
+    messages:
+      privateGetOrdersRequest:
+        $ref: '#/components/messages/privateGetOrdersRequest'
+  privateGetOrdersReply:
+    messages:
+      privateGetOrdersResponse:
+        $ref: '#/components/messages/orderResponseFull'
+
+  privateCancelOrders:
+    messages:
+      privateCancelOrdersRequest:
+        $ref: '#/components/messages/privateCancelOrdersRequest'
+  privateCancelOrdersReply:
+    messages:
+      privateCancelOrdersResponse:
+        $ref: '#/components/messages/privateCancelOrdersResponse'
+
+  privateAtomicCancelOrders:
+    messages:
+      privateAtomicCancelOrdersRequest:
+        $ref: '#/components/messages/privateAtomicCancelOrdersRequest'
+  privateAtomicCancelOrdersReply:
+    messages:
+      privateAtomicCancelOrdersResponse:
+        $ref: '#/components/messages/privateAtomicCancelOrdersResponse'
+
+  privateCancelOrdersAfter:
+    messages:
+      privateCancelOrdersAfterRequest:
+        $ref: '#/components/messages/privateCancelOrdersAfterRequest'
+  privateCancelOrdersAfterReply:
+    messages:
+      privateCancelOrdersAfterResponse:
+        $ref: '#/components/messages/privateCancelOrdersAfterResponse'
+
+  # --- Transfer request/reply channels ---
+
+  privateDepositAssets:
+    messages:
+      privateDepositAssetsRequest:
+        $ref: '#/components/messages/privateDepositAssetsRequest'
+  privateDepositAssetsReply:
+    messages:
+      digitalAssetDeposit:
+        $ref: '#/components/messages/digitalAssetDepositResponse'
+      fiatDeposit:
+        $ref: '#/components/messages/fiatDepositResponse'
+
+  privateGetDepositHistory:
+    messages:
+      privateGetDepositHistoryRequest:
+        $ref: '#/components/messages/privateGetDepositHistoryRequest'
+  privateGetDepositHistoryReply:
+    messages:
+      digitalAssetHistory:
+        $ref: '#/components/messages/digitalAssetDepositHistoryResponse'
+      fiatHistory:
+        $ref: '#/components/messages/fiatDepositHistoryResponse'
+
+  privateWithdrawAssets:
+    messages:
+      privateWithdrawAssetsRequest:
+        $ref: '#/components/messages/privateWithdrawAssetsRequest'
+  privateWithdrawAssetsReply:
+    messages:
+      privateWithdrawAssetsResponse:
+        $ref: '#/components/messages/privateWithdrawAssetsResponse'
+
+  privateCryptoWithdrawal:
+    messages:
+      privateCryptoWithdrawalRequest:
+        $ref: '#/components/messages/privateCryptoWithdrawalRequest'
+  privateCryptoWithdrawalReply:
+    messages:
+      privateCryptoWithdrawalResponse:
+        $ref: '#/components/messages/privateCryptoWithdrawalResponse'
+
+  privateGetWithdrawalHistory:
+    messages:
+      privateGetWithdrawalHistoryRequest:
+        $ref: '#/components/messages/privateGetWithdrawalHistoryRequest'
+  privateGetWithdrawalHistoryReply:
+    messages:
+      privateGetWithdrawalHistoryResponse:
+        $ref: '#/components/messages/privateGetWithdrawalHistoryResponse'
+
+  # --- Account request/reply channels ---
+
+  privateGetAccount:
+    messages:
+      privateGetAccountRequest:
+        $ref: '#/components/messages/privateGetAccountRequest'
+  privateGetAccountReply:
+    messages:
+      privateGetAccountResponse:
+        $ref: '#/components/messages/privateGetAccountResponse'
+
+  privateGetBalance:
+    messages:
+      privateGetBalanceRequest:
+        $ref: '#/components/messages/privateGetBalanceRequest'
+  privateGetBalanceReply:
+    messages:
+      privateGetBalanceResponse:
+        $ref: '#/components/messages/privateGetBalanceResponse'
+
+  privateGetFees:
+    messages:
+      privateGetFeesRequest:
+        $ref: '#/components/messages/privateGetFeesRequest'
+  privateGetFeesReply:
+    messages:
+      privateGetFeesResponse:
+        $ref: '#/components/messages/privateGetFeesResponse'
+
+  privateGetTransactionHistory:
+    messages:
+      privateGetTransactionHistoryRequest:
+        $ref: '#/components/messages/privateGetTransactionHistoryRequest'
+  privateGetTransactionHistoryReply:
+    messages:
+      privateGetTransactionHistoryResponse:
+        $ref: '#/components/messages/privateGetTransactionHistoryResponse'
+
+  # --- Synchronization request/reply channels ---
+
+  getTime:
+    messages:
+      getTimeRequest:
+        $ref: '#/components/messages/getTimeRequest'
+  getTimeReply:
+    messages:
+      getTimeResponse:
+        $ref: '#/components/messages/getTimeResponse'
+
+  getMarkets:
+    messages:
+      getMarketsRequest:
+        $ref: '#/components/messages/getMarketsRequest'
+  getMarketsReply:
+    messages:
+      getMarketsResponse:
+        $ref: '#/components/messages/getMarketsResponse'
+
+  getAssets:
+    messages:
+      getAssetsRequest:
+        $ref: '#/components/messages/getAssetsRequest'
+  getAssetsReply:
+    messages:
+      getAssetsResponse:
+        $ref: '#/components/messages/getAssetsResponse'
+
+  # --- Subscription channels ---
+
+  tickerSubscription:
+    messages:
+      tickerSubscribeRequest:
+        $ref: '#/components/messages/tickerSubscriptionRequest'
+  tickerEvents:
+    messages:
+      tickerConfirmation:
+        $ref: '#/components/messages/tickerSubscriptionConfirmation'
+      tickerEvent:
+        $ref: '#/components/messages/tickerEvent'
+
+  ticker24hSubscription:
+    messages:
+      ticker24hSubscribeRequest:
+        $ref: '#/components/messages/ticker24hSubscriptionRequest'
+  ticker24hEvents:
+    messages:
+      ticker24hConfirmation:
+        $ref: '#/components/messages/ticker24hSubscriptionConfirmation'
+      ticker24hEvent:
+        $ref: '#/components/messages/ticker24hEvent'
+
+  candlesSubscription:
+    messages:
+      candlesSubscribeRequest:
+        $ref: '#/components/messages/candlesSubscriptionRequest'
+  candlesEvents:
+    messages:
+      candlesConfirmation:
+        $ref: '#/components/messages/candlesSubscriptionConfirmation'
+      candlesEvent:
+        $ref: '#/components/messages/candlesEvent'
+
+  tradesSubscription:
+    messages:
+      tradesSubscribeRequest:
+        $ref: '#/components/messages/tradesSubscriptionRequest'
+  tradesEvents:
+    messages:
+      tradesConfirmation:
+        $ref: '#/components/messages/tradesSubscriptionConfirmation'
+      tradesEvent:
+        $ref: '#/components/messages/tradesEvent'
+
+  bookSubscription:
+    messages:
+      bookSubscribeRequest:
+        $ref: '#/components/messages/bookSubscriptionRequest'
+  bookEvents:
+    messages:
+      bookConfirmation:
+        $ref: '#/components/messages/bookSubscriptionConfirmation'
+      bookEvent:
+        $ref: '#/components/messages/bookEvent'
+
+  accountSubscription:
+    messages:
+      accountSubscribeRequest:
+        $ref: '#/components/messages/accountSubscriptionRequest'
+  accountEvents:
+    messages:
+      accountConfirmation:
+        $ref: '#/components/messages/accountSubscriptionConfirmation'
+      orderEvent:
+        $ref: '#/components/messages/accountOrderEvent'
+      fillEvent:
+        $ref: '#/components/messages/accountFillEvent'
+
+# =============================================================================
+# Components - messages and schemas placeholder
+# =============================================================================
+# Due to file size, the full message and schema definitions continue below.
+# Each message contains the complete inline payload schema.
+
+components:
+
+  securitySchemes:
+    websocketAuth:
+      type: httpApiKey
+      in: query
+      name: token
+      description: Authenticated WebSocket session token obtained via REST API.
+
+  messages:
+
+    # =========================================================================
+    # Market data messages
+    # =========================================================================
+
+    getBookRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getBook**.
+            type: string
+            example: getBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+          depth:
+            description: The number of `bids` and `asks` to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            example: 5
+
+    getBookResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which the order book is returned.
+                type: string
+                example: BTC-EUR
+              nonce:
+                description: |
+                  Unique identifier of the market data in the order book at a specific time. `nonce` is incremented by 1 every time the order book changes.
+                  For example, when an order is placed, updated, or deleted.
+                type: integer
+                example: 438524
+              bids:
+                type: array
+                description: |
+                  The list of buy orders for the specified `market` and `depth`. Every bid contains:
+
+                  - `price`: the offer for 1 unit of base currency in the amount of quote currency. For 
+                  example, **34243** Euros.
+
+                  - `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.
+                items:
+                  type: array
+                  items:
+                    type: string
+                example:
+                  - - '4999.9'
+                    - '0.015'
+                  - - '4999.8'
+                    - '0.015'
+              asks:
+                type: array
+                description: |
+                  The list of sell orders for the specified `market` and `depth`. Every bid contains:
+
+                    - `price`: the offer for 1 unit of base currency in the amount of quote currency. For 
+                  example, **34243** Euros.                   
+
+                    - `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.
+                items:
+                  type: array
+                  items:
+                    type: string
+                example:
+                  - - '5001.1'
+                    - '0.015'
+                  - - '5001.2'
+                    - '0.015'
+              timestamp:
+                description: The Unix timestamp in nanoseconds of the last transaction event.
+                type: integer
+                example: 1752139200000000000
+
+    getTradesRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTrades**.
+            type: string
+            example: getTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the trades.
+            type: string
+            example: BTC-EUR
+          limit:
+            description: The maximum number of trades to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: |
+              The Unix timestamp in milliseconds starting from which to return trades.
+              <br/>
+              > Can only return trades for a period of up to 24 hours.
+            type: integer
+            example: 1751541801000
+          end:
+            description: |
+              The Unix timestamp in milliseconds until which to return trades.
+              <br/>
+              > Cannot be more than 24 hours after the `start` timestamp. Can only return trades for a period of up to 24 hours.
+            type: integer
+            example: 1751548920000
+          tradeIdFrom:
+            description: The unique identifier of the trade starting from which to return the trades.
+            type: string
+          tradeIdTo:
+            description: The unique identifier of the trade up to which to return the trades.
+            type: string
+
+    getTradesResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              id:
+                description: The unique identifier of the trade.
+                type: string
+                example: 57b1159b-6bf5-4cde-9e2c-6bd6a5678baf
+              timestamp:
+                description: The Unix timestamp in milliseconds when the trade was made.
+                type: integer
+                example: 1542967486256
+              amount:
+                description: The amount of base currency exchanged in the trade. For example, **0.1** Bitcoin.
+                type: string
+                example: '0.1'
+              price:
+                description: |
+                  The price of 1 unit of base currency in the amount of quote currency at the time of the trade.
+                  For example, **34243** Euro.
+                type: string
+                example: '34243'
+              side:
+                description: Indicates if the taker, who fills the order, is selling or buying.
+                type: string
+                enum:
+                  - sell
+                  - buy
+
+    getTickerPriceRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTickerPrice**.
+            type: string
+            example: getTickerPrice
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+
+    getTickerPriceResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTickerPrice
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which you requested the latest trade price.
+                type: string
+                example: BTC-EUR
+              price:
+                description: |
+                  The latest trade price for 1 unit of base currency in the amount of quote currency for the specified `market`. For example, **34243** Euro.
+                type: string
+                example: '34243'
+
+    getTickerBookRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTickerBook**.
+            type: string
+            example: getTickerBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+
+    getTickerBookResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTickerBook
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which you requested the latest trade price.
+                type: string
+                example: BTC-EUR
+              bid:
+                description: The highest buy order in the quote currency for the `market` currently available on Bitvavo.
+                type: string
+                example: '4999.9'
+              bidSize:
+                description: The amount of base currency for the `bid` in the order.
+                type: string
+                example: '0.15'
+              ask:
+                description: The lowest sell order in the quote currency for the `market` currently available on Bitvavo.
+                type: string
+                example: '5003.3'
+              askSize:
+                description: The amount of base currency for the `ask` in the order.
+                type: string
+                example: '0.2'
+
+    getCandlesRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - interval
+        properties:
+          action:
+            description: Set value to **getCandles**.
+            type: string
+            example: getCandles
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+          interval:
+            description: The time interval between each candlestick. Determines the allowed values for `start` and `end` parameters.
+            type: string
+            enum:
+              - 1m
+              - 5m
+              - 15m
+              - 30m
+              - 1h
+              - 2h
+              - 4h
+              - 6h
+              - 8h
+              - 12h
+              - 1d
+              - 1W
+              - 1M
+          limit:
+            description: The maximum number of candlestick data to return.
+            type: integer
+            minimum: 1
+            maximum: 1440
+            default: 1440
+          start:
+            description: |
+              The Unix timestamp in milliseconds starting from which to return the candlestick data.
+              <br/>
+              > The timestamp must align exactly with the start of the specified `interval`. For example, for a 1-hour candlestick that starts at 13:00:00.000 Amsterdam time, use `1704067200000`.
+            type: integer
+            example: 1704067200000
+          end:
+            description: |
+              The Unix timestamp in milliseconds until which to return the candlestick data.
+              <br/>
+              > The timestamp must align exactly with the end of the specified `interval`. For example, for a 1-hour candlestick that ends at 14:00:00.000 Amsterdam time, use `1766062800000`.
+            type: integer
+            example: 1704153600000
+
+    getCandlesResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getCandles
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: array
+            description: |
+              An array with the candlestick data for the specified time period. Each element is an array containing exactly 6 values in this order:
+
+              - `timestamp` (integer): Unix timestamp in milliseconds for the start of the candlestick period.
+              - `open` (string): The starting price for the `market` at `timestamp`.
+              - `high` (string): The highest price for the `market` during the `interval`.
+              - `low` (string): The lowest price for the `market` during the `interval`.
+              - `close` (string): The closing price for the `market` after the `interval`.
+              - `volume` (string): The amount traded in the `market` during the `interval`.
+            items:
+              type: array
+              minItems: 6
+              maxItems: 6
+            example:
+              - [1704153540000, "40050", "40071", "40049", "40071", "0.52680563"]
+              - [1704153480000, "40021", "40054", "40021", "40053", "2.64389051"]
+
+    getTicker24hRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **getTicker24h**.
+            type: string
+            example: getTicker24h
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the order book.
+            type: string
+            example: BTC-EUR
+
+    getTicker24hResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTicker24h
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              market:
+                description: The market for which you requested the ticker data.
+                type: string
+                example: BTC-EUR
+              startTimestamp:
+                description: The Unix timestamp in milliseconds starting from which to return the data.
+                type: integer
+                example: 1700490607372
+              timestamp:
+                description: The Unix timestamp in milliseconds when the data was requested.
+                type: integer
+                example: 1700576057382
+              open:
+                description: The opening price for the `market` in the base currency.
+                type: string
+                example: '5001.1'
+              openTimestamp:
+                description: The Unix timestamp in milliseconds when the `market` opened after the `startTimestamp`.
+                type: integer
+                example: 1700490620146
+              high:
+                description: The highest trade price for 1 unit of base currency in the quote currency.
+                type: string
+                example: '5003.2'
+              low:
+                description: The lowest trade price for 1 unit of base currency in the quote currency.
+                type: string
+                example: '5001.1'
+              last:
+                description: The latest trade price for 1 unit of base currency in the quote currency.
+                type: string
+                example: '5003.2'
+              closeTimestamp:
+                description: The Unix timestamp in milliseconds when the `market` closed after the `startTimestamp`.
+                type: integer
+                example: 1700490620146
+              bid:
+                description: The highest buy order in the quote currency.
+                type: string
+                example: '4999.9'
+              bidSize:
+                description: The amount of base currency for the `bid`.
+                type: string
+                example: '0.15'
+              ask:
+                description: The lowest sell order in the quote currency.
+                type: string
+                example: '5003.3'
+              askSize:
+                description: The amount of base currency for the `ask`.
+                type: string
+                example: '0.2'
+              volume:
+                description: The total amount of base currency traded.
+                type: string
+                example: '0.15'
+              volumeQuote:
+                description: The total amount of quote currency traded.
+                type: string
+                example: '750.2865'
+
+    # =========================================================================
+    # Trading messages
+    # =========================================================================
+
+    privateCreateOrderRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - side
+          - orderType
+          - operatorId
+        properties:
+          action:
+            description: Set value to **privateCreateOrder**.
+            type: string
+            example: privateCreateOrder
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            type: string
+            example: BTC-EUR
+            description: The market in which to create the order.
+          side:
+            type: string
+            enum: [buy, sell]
+            description: Indicates whether the order is to buy or sell the asset.
+          orderType:
+            type: string
+            enum: [market, limit, stopLoss, stopLossLimit, takeProfit, takeProfitLimit]
+            description: |
+              The type of order to create. Possible values:
+
+              - `market`: an order to buy or sell digital assets at the current market `price`. 
+              - `limit`: an order to buy or sell digital assets at the specified `price` or better.
+              - `stopLoss`: a market order to buy or sell digital assets when the market price is worse or equal to your stop price. Worse means lower for sell orders and higher for buy orders.
+              - `stopLossLimit`: a limit order to buy or sell digital assets at the specified `price` or better when the market price is worse or equal to your stop price. Worse means lower for sell orders and higher for buy orders.
+              - `takeProfit`: a market order to buy or sell digital assets when the market price is better or equal to your stop price. Better means higher for sell orders and lower for buy orders.
+              - `takeProfitLimit`: a limit order to buy or sell digital assets at the specified `price` or better when the market price is better or equal to your stop price. Better means higher for sell orders and lower for buy orders.
+
+              <br/>
+
+              > For limit orders, you need to set `amount` and `price`. For market orders, you need to set either `amount` or `amountQuote`.
+          operatorId:
+            description: Your identifier for the trader or the bot within your account that made the request.
+            type: integer
+            format: int64
+            example: 543462
+          clientOrderId:
+            type: string
+            format: UUID
+            description: Your identifier of the order. Must be unique across open orders.
+            example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+          amount:
+            type: string
+            example: '1.567'
+            description: |
+              The quantity of the base currency to buy or sell. To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `quantityDecimals` field.
+          amountQuote:
+            type: string
+            example: '5000'
+            description: |
+              The quantity of the quote currency to buy or sell for the `market`, `stopLoss`, or `takeProfit` order types. To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `quantityDecimals` field.
+          price:
+            type: string
+            example: '6000'
+            description: |
+              The price in quote currency for which you want to buy or sell 1 unit of the base currency.
+
+              <br/>
+
+              > Must be a multiple of the `tickSize` value for the market. To get the `tickSize`, make a [Get markets](/docs/websocket-api/get-markets/) request.
+          triggerAmount:
+            type: string
+            example: '4000'
+            description: The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.
+          triggerType:
+            type: string
+            enum: [price]
+            description: The type of trigger that fills the order when the condition is met.
+          triggerReference:
+            type: string
+            enum: [lastTrade, bestBid, bestAsk, midPrice]
+            description: The price which triggers the order to be filled for `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+          timeInForce:
+            type: string
+            enum: [GTC, IOC, FOK]
+            default: GTC
+            description: How long an order stays active for.
+          postOnly:
+            type: boolean
+            default: false
+            description: If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+          selfTradePrevention:
+            type: string
+            enum: [cancelBoth, cancelNewest, cancelOldest, decrementAndCancel]
+            default: decrementAndCancel
+            description: |
+              **[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.
+
+              Indicates how to prevent self-trading for conflicting orders of any type.
+
+              Possible values:
+              - `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order. 
+              For example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.
+              - `cancelOldest`: cancels the older conflicting order in the same market.
+              - `cancelNewest`: cancels the later conflicting order in the same market.
+              - `cancelBoth`: cancels both conflicting orders in the same market.
+          disableMarketProtection:
+            type: boolean
+            default: false
+            deprecated: true
+            description: Must be **false** because market protection can no longer be disabled.
+          responseRequired:
+            type: boolean
+            default: true
+            description: |
+              Indicates whether the response returns all parameters (**true**) or only the HTTP status code (**false**).
+          codGroupId:
+            type: integer
+            example: 1
+            minimum: 1
+            maximum: 1000
+            description: Your identifier for a [group of orders](/docs/websocket-api/cancel-orders-after/).
+
+    privateUpdateOrderRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - operatorId
+        properties:
+          action:
+            description: Set value to **privateUpdateOrder**.
+            type: string
+            example: privateUpdateOrder
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market in which to update an order.
+            type: string
+            example: BTC-EUR
+          operatorId:
+            description: Your identifier for the trader or the bot within your account that made the request.
+            type: integer
+            format: int64
+            example: 543462
+          orderId:
+            description: Bitvavo identifier of the order to update.
+            type: string
+            format: UUID
+            example: 95d92d6c-ecf0-4960-a608-9953ef71652e
+          clientOrderId:
+            description: |
+              Your identifier of the order to update. Must be unique among open orders.
+
+              <br/>
+
+              > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+            type: string
+            format: UUID
+            example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+          amount:
+            description: |
+              The amount of base currency to update. Specifying the `amount` automatically adjusts the `amountRemaining`. 
+
+              <br/>
+
+              To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `quantityDecimals` field.
+            type: string
+            example: '1.567'
+          amountQuote:
+            description: |
+              **Only for `takeProfit` and `stopLoss` orders that are not triggered yet**. The amount of quote currency to buy or sell at the best available price. 
+
+              <br/>
+
+              > To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `notionalDecimals` field.
+            type: string
+            example: '5000'
+          amountRemaining:
+            description: |
+              The remaining amount of base currency to update. Specifying the `amountRemaining` automatically adjusts the `amount`.
+
+              <br/>
+
+              > We discourage updating the `amountRemaining` because you can end up buying or selling more than you intended.
+            type: string
+            example: '1.560'
+          price:
+            description: |
+              The amount of quote currency for 1 unit of the base currency.
+
+              <br/>
+
+              > Must be a multiple of the `tickSize` value for the market. To get the `tickSize`, make a [Get markets](/docs/websocket-api/get-markets/) request.
+            type: string
+            example: '6000'
+          triggerAmount:
+            description: |
+              **Only for stop orders**. The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.
+
+              <br/>
+
+              > You can only update orders that have not been triggered yet.
+            type: string
+            example: '4000'
+          timeInForce:
+            description: |
+              How long an `orderType` stays active for. Possible values:
+
+              - `FOK`: *Fill-Or-Kill*. Fills the entire order from existing orders, or cancels the entire order.
+              - `GTC`: *Good-Til-Canceled*. Stays in the order book until the entire order is filled or you manually cancel it. 
+              - `IOC`: *Immediate-Or-Cancel*. Fills existing orders and cancels the unfilled balance.
+
+              <br/>
+
+              > You can only update orders that have not been triggered yet.
+            type: string
+            enum: [GTC, IOC, FOK]
+          selfTradePrevention:
+            description: |
+              **[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.
+
+              Indicates how to prevent self-trading for conflicting orders of any type.
+
+              Possible values:
+              - `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order. 
+              For example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.
+              - `cancelOldest`: cancels the older conflicting order in the same market.
+              - `cancelNewest`: cancels the later conflicting order in the same market.
+              - `cancelBoth`: cancels both conflicting orders in the same market.
+            type: string
+            enum: [decrementAndCancel, cancelOldest, cancelNewest, cancelBoth]
+          postOnly:
+            description: |
+              If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+            type: boolean
+          responseRequired:
+            description: |
+              Indicates whether the response returns all parameters (**true**) or only the HTTP status code (**false**).
+            type: boolean
+            default: true
+
+    privateGetOrderRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - orderId
+        properties:
+          action:
+            description: Set value to **privateGetOrder**.
+            type: string
+            example: privateGetOrder
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market in which to update an order.
+            type: string
+            example: BTC-EUR
+          orderId:
+            description: Bitvavo identifier of the order to update.
+            type: string
+            format: UUID
+            example: 95d92d6c-ecf0-4960-a608-9953ef71652e
+          clientOrderId:
+            description: |
+              Your identifier of the order to update. Must be unique among open orders.
+
+              <br/>
+
+              > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+            type: string
+            format: UUID
+            example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+
+    privateCancelOrderRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - operatorId
+        properties:
+          action:
+            description: Set value to **privateCancelOrder**.
+            type: string
+            example: privateCancelOrder
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market in which to update an order.
+            type: string
+            example: BTC-EUR
+          operatorId:
+            description: Your identifier for the trader or the bot within your account that made the request.
+            type: integer
+            format: int64
+            example: 543462
+          orderId:
+            description: Bitvavo identifier of the order to update.
+            type: string
+            format: UUID
+            example: 95d92d6c-ecf0-4960-a608-9953ef71652e
+          clientOrderId:
+            description: |
+              Your identifier of the order to cancel.
+
+              <br/>
+
+              > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+            type: string
+            format: UUID
+            example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+
+    privateCancelOrderResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateCancelOrder
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              orderId:
+                description: Bitvavo identifier of the order.
+                type: string
+                format: UUID
+                example: 2e7ce7fc-44e2-4d80-a4a7-d079c4750b61
+              clientOrderId:
+                description: Your identifier of the cancelled order. Only returned if specified in the request.
+                type: string
+                format: UUID
+                example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+              operatorId:
+                description: Your identifier for the trader or the bot within your account that made the request.
+                type: integer
+                format: int64
+                example: 543462
+
+    privateGetOrdersOpenRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetOrdersOpen**.
+            type: string
+            example: privateGetOrdersOpen
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market in which return the open orders.
+            type: string
+            example: BTC-EUR
+          base:
+            description: The base asset for which to return the open orders. If neither `market` nor `base` are specified, all open orders are returned.
+            type: string
+            example: BTC
+
+    privateGetTradesRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **privateGetTrades**.
+            type: string
+            example: privateGetTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the trades.
+            type: string
+            example: BTC-EUR
+          limit:
+            description: The maximum number of trades to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: |
+              The Unix timestamp in milliseconds starting from which to return trades.
+              <br/>
+              > Can only return trades for a period of up to 24 hours.
+            type: integer
+            example: 1751541801000
+          end:
+            description: |
+              The Unix timestamp in milliseconds until which to return trades.
+              <br/>
+              > Cannot be more than 24 hours after the `start` timestamp. Can only return trades for a period of up to 24 hours.
+            type: integer
+            example: 1751548920000
+          tradeIdFrom:
+            description: The unique identifier of the trade starting from which to return the trades.
+            type: string
+          tradeIdTo:
+            description: The unique identifier of the trade up to which to return the trades.
+            type: string
+
+    privateGetTradesResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetTrades
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              id:
+                description: The unique identifier of the fill.
+                type: string
+                example: 108c3633-0276-4480-a902-17a01829deae
+              orderId:
+                description: Bitvavo identifier of the order that was filled.
+                type: string
+                format: UUID
+                example: 1d671998-3d44-4df4-965f-0d48bd129a1b
+              clientOrderId:
+                description: Your identifier of the order that was filled.
+                type: string
+                format: UUID
+                example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+              timestamp:
+                description: The Unix timestamp in milliseconds when the trade was made.
+                type: integer
+                example: 1542967486256
+              market:
+                description: The market for which to return past trades.
+                type: string
+                example: BTC-EUR
+              side:
+                description: Indicates if the taker, who filled the order, is selling or buying.
+                type: string
+                enum: [buy, sell]
+              amount:
+                description: The amount of base currency exchanged in the trade.
+                type: string
+                example: '0.005'
+              price:
+                description: The price of 1 unit of base currency in the amount of quote currency at the time of the trade.
+                type: string
+                example: '5000.1'
+              taker:
+                description: Indicates whether you are the taker for the fill.
+                type: boolean
+                example: true
+              fee:
+                description: The fee that was paid. Value is negative for rebates. Only available if `settled` is true.
+                type: string
+                example: '0.03'
+              feeCurrency:
+                description: Currency in which the fee was paid. Only available is `settled` is true.
+                type: string
+                example: EUR
+              settled:
+                description: |
+                  Indicates whether the fee was deducted and the exchanged
+                  currency is available for further trading.
+                type: boolean
+
+    privateGetOrdersRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **privateGetOrders**.
+            type: string
+            example: privateGetOrders
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return the orders.
+            type: string
+            example: BTC-EUR
+          limit:
+            description: The maximum number of orders to return.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: The Unix timestamp in milliseconds starting from which to return orders.
+            type: integer
+            example: 1751541801000
+          end:
+            description: |
+              The Unix timestamp in milliseconds until which to return orders.
+              <br/>
+              > Cannot be more than 24 hours after the `start` timestamp.
+            type: integer
+            example: 1751548920000
+          orderId:
+            description: |
+              **Deprecated**: `orderId` is interpreted as `orderIdTo`. If used, returns all orders up to this `orderId`.
+            type: string
+            format: UUID
+            deprecated: true
+          orderIdFrom:
+            description: The unique identifier of the order starting from which to return the trades.
+            type: string
+            format: UUID
+          orderIdTo:
+            description: The unique identifier of the order up to which to return the trades.
+            type: string
+            format: UUID
+
+    privateCancelOrdersRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - operatorId
+        properties:
+          action:
+            description: Set value to **privateCancelOrders**.
+            type: string
+            example: privateCancelOrders
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: |
+              The market in which to cancel the orders. 
+              <br/>
+              If not specified, all open orders are canceled.
+            example: BTC-EUR
+            type: string
+          operatorId:
+            type: integer
+            format: int64
+            example: 543462
+            description: Your identifier for the trader or the bot within your account that made the request.
+
+    privateCancelOrdersResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateCancelOrders
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              orderId:
+                type: string
+                format: UUID
+                description: Bitvavo identifier of the canceled order.
+                example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+              operatorId:
+                description: Your identifier for the trader or the bot within your account that made the request.
+                type: integer
+                format: int64
+                example: 543462
+
+    privateAtomicCancelOrdersRequest:
+      payload:
+        type: object
+        required:
+          - market
+          - side
+          - operatorId
+        properties:
+          action:
+            description: Set value to **privateAtomicCancelOrders**.
+            type: string
+            example: privateAtomicCancelOrders
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: |
+              The market in which to cancel all orders on the selected `side`.
+            type: string
+            example: BTC-EUR
+          side:
+            description: |
+              Cancels all **buy** orders or all **sell** orders in specified `market`.
+            type: string
+            enum:
+              - buy
+              - sell
+          operatorId:
+            type: integer
+            format: int64
+            example: 543462
+            description: Your identifier for the trader or the bot within your account that made the request.
+
+    privateAtomicCancelOrdersResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateAtomicCancelOrders
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: array
+            description: An array with the list of canceled orders.
+            items:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  format: UUID
+                  description: Bitvavo identifier of the canceled order.
+                  example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                operatorId:
+                  description: Your identifier for the trader or the bot within your account that made the request.
+                  type: integer
+                  format: int64
+                  example: 543462
+
+    privateCancelOrdersAfterRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - codGroupId
+          - expiryAfterSeconds
+        properties:
+          action:
+            type: string
+            description: Set value to **privateCancelOrdersAfter**.
+            example: privateCancelOrdersAfter
+          codGroupId:
+            type: integer
+            example: 1
+            minimum: 1
+            maximum: 1000
+            description: Your identifier for a group of orders.
+          expiryAfterSeconds:
+            type: integer
+            example: 30
+            minimum: 10
+            maximum: 300
+            description: Your countdown timer in seconds after which open orders are canceled.
+          requestId:
+            type: integer
+            example: 1
+            description: Your identifier for the request.
+
+    privateCancelOrdersAfterResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              codGroupId:
+                type: integer
+                example: 1
+                description: Your identifier for a group of orders.
+              timeOfExpirySeconds:
+                type: integer
+                example: 17202139111
+                description: Your countdown timer in seconds after which open orders are canceled.
+
+    orderResponseFull:
+      title: "responseRequired=true"
+      description: Full order response (when `responseRequired` is true or for Get Order / Get Open Orders / Get Orders).
+      payload:
+        $ref: '#/components/schemas/OrderResponseFull'
+
+    orderResponseMinimal:
+      title: "responseRequired=false"
+      description: Minimal order response (when `responseRequired` is false).
+      payload:
+        $ref: '#/components/schemas/OrderResponseMinimal'
+
+    # =========================================================================
+    # Transfer messages
+    # =========================================================================
+
+    privateDepositAssetsRequest:
+      payload:
+        type: object
+        required:
+          - market
+        properties:
+          action:
+            description: Set value to **privateDepositAssets**.
+            type: string
+            example: privateDepositAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset you want to deposit.
+            type: string
+            example: BTC
+
+    digitalAssetDepositResponse:
+      title: "Digital asset"
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateDepositAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              address:
+                description: The address where to deposit assets.
+                type: string
+                example: CryptoCurrencyAddress
+              paymentId:
+                description: If available, you need to specify `paymentId` with your deposit. It is sometimes called *note*, *memo*, or *tag*.
+                type: string
+                example: '10002653'
+
+    fiatDepositResponse:
+      title: "Fiat"
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateDepositAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              iban:
+                description: International bank account number where to deposit assets.
+                type: string
+                example: NL32BUNQ2291234129
+              bic:
+                description: Bank identification code sometimes necessary for international transfers.
+                type: string
+                example: BUNQNL2A
+              description:
+                description: Description which must be used for the deposit.
+                type: string
+                example: 254D20CC94
+
+    privateGetDepositHistoryRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - requestId
+        properties:
+          action:
+            description: Set value to **privateGetDepositHistory**.
+            type: string
+            example: privateGetDepositHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset you want to deposit.
+            type: string
+            example: BTC
+          limit:
+            description: The maximum number of deposits to return, from latest to earliest.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: The Unix timestamp in milliseconds starting from which to return deposits.
+            type: integer
+            example: 1751541801000
+          end:
+            description: The Unix timestamp in milliseconds up to which to return deposits.
+            type: integer
+            example: 1751548920000
+
+    digitalAssetDepositHistoryResponse:
+      title: "Digital asset"
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetDepositHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              timestamp:
+                description: The Unix timestamp in milliseconds when the deposit was made.
+                type: integer
+                example: 1706609321000
+              symbol:
+                type: string
+                example: BTC
+                description: The asset you deposited on Bitvavo.
+              amount:
+                description: The quantity of the asset you deposited on Bitvavo.
+                type: string
+                example: '0.99994'
+              address:
+                description: The address where you deposited assets.
+                type: string
+                example: 14qViLJfdGaP4EeHnDyJbEGQysnCpwk3gd
+              paymentId:
+                description: The unique identifier of the deposit. Returned if specified in the request.
+                type: string
+                example: '10002653'
+              txId:
+                description: The unique identifier of the transaction on the blockchain.
+                type: string
+                example: 927b3ea50c5bb52c6854152d305dfa1e27fc01d10464cf10825d96d69d235eb3
+              fee:
+                description: The [transaction fee](https://bitvavo.com/en/fees) for a deposit on Bitvavo.
+                type: string
+                example: '0.000063'
+
+    fiatDepositHistoryResponse:
+      title: "Fiat"
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetDepositHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              timestamp:
+                description: The Unix timestamp in milliseconds when the deposit was made.
+                type: integer
+                example: 1706609321000
+              symbol:
+                type: string
+                example: EUR
+                description: The currency you deposited on Bitvavo.
+              amount:
+                description: The quantity of the asset you deposited on Bitvavo.
+                type: string
+                example: '500'
+              fee:
+                description: The [transaction fee](https://bitvavo.com/en/fees) for a deposit on Bitvavo.
+                type: string
+                example: '0'
+              status:
+                description: The state of the deposit. Can be **completed** or **canceled**.
+                type: string
+                example: completed
+              address:
+                description: The bank account from which the deposit was made.
+                type: string
+                example: NL89BANK0123456789
+
+    privateWithdrawAssetsRequest:
+      payload:
+        type: object
+        required:
+          - symbol
+          - amount
+          - address
+        properties:
+          action:
+            description: Set value to **privateWithdrawAssets**.
+            type: string
+            example: privateWithdrawAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            type: string
+            example: BTC
+            description: The asset you want to withdraw.
+          amount:
+            description: The quantity of the asset to withdraw.
+            type: string
+            example: '1.5'
+          address:
+            description: |
+              The address where to withdraw assets.
+              <br/>
+              > You can only withdraw to addresses which you have added and confirmed in your address book. Funds cannot be recovered after being withdrawn to the wrong address.
+            type: string
+            example: BitcoinAddress
+          paymentId:
+            description: |
+              The unique identifier of the transaction of a digital asset. It is sometimes called *note*, *memo*, or *tag*.
+              Should be specified when withdrawing straight to another exchange or merchants that require a `paymentId`.
+            type: string
+            example: '10002653'
+          addWithdrawalFee:
+            description: |
+              Indicates if a fee is added in addition to the requested amount. If **false**, the fee is part of the requested amount and
+              subtracted from the withdrawal.
+            type: boolean
+            default: false
+          internal:
+            description: '**Deprecated** Do not use or set to **false** to avoid errors.'
+            type: boolean
+            default: false
+            deprecated: true
+
+    privateWithdrawAssetsResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateWithdrawAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              success:
+                description: Indicates if the withdrawal request was successful.
+                type: boolean
+                example: true
+              symbol:
+                type: string
+                example: BTC
+                description: The asset that was withdrawn.
+              amount:
+                description: The total amount deducted from your balance.
+                type: string
+                example: '1.5'
+
+    privateCryptoWithdrawalRequest:
+      payload:
+        type: object
+        required:
+          - asset
+          - network
+          - address
+          - amount
+        properties:
+          action:
+            description: Set value to **privateCryptoWithdrawal**.
+            type: string
+            example: privateCryptoWithdrawal
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          asset:
+            type: string
+            minLength: 1
+            maxLength: 10
+            example: SOL
+            description: The asset you want to withdraw.
+          network:
+            type: string
+            minLength: 1
+            maxLength: 10
+            example: SOL
+            description: |
+              The network you want to withdraw the asset to.
+          address:
+            type: string
+            minLength: 1
+            maxLength: 500
+            example: BitcoinAddress
+            description: |
+              The address where to withdraw the asset to.
+              <br/>
+              > Make sure to check the address. Funds cannot be recovered after being withdrawn to the wrong address.
+          amount:
+            type: string
+            example: '0.05'
+            description: |
+              The amount to withdraw as a decimal string.
+          deductFeeFromAmount:
+            type: boolean
+            default: false
+            description: |
+              If **false** (default), the recipient receives the full `amount` and the fee is charged separately. If **true**, the fee is deducted from `amount` before it is sent.
+          idempotencyKey:
+            type: string
+            minLength: 5
+            maxLength: 50
+            example: '111-06001'
+            description: |
+              Retries with the same key return the existing withdrawal when the request matches; otherwise the request is rejected.
+          memo:
+            type: string
+            minLength: 1
+            maxLength: 500
+            description: |
+              Memo or tag for networks that require it. Must match the one from the address book. Also known as *note* or *paymentId*.
+
+    privateCryptoWithdrawalResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateCryptoWithdrawal
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier of the withdrawal.
+                example: 019e3a4e-8b29-732f-8d46-294828c1a40d
+              asset:
+                type: string
+                minLength: 1
+                maxLength: 10
+                example: SOL
+                description: The asset that was withdrawn.
+              network:
+                type: string
+                minLength: 1
+                maxLength: 10
+                example: SOL
+                description: The network the asset was withdrawn to.
+              address:
+                type: string
+                minLength: 1
+                maxLength: 500
+                example: BitcoinAddress
+                description: The address where the asset was withdrawn to.
+              amount:
+                type: string
+                example: '0.0424'
+                description: |
+                  The amount that was withdrawn as a decimal string.
+              fee:
+                type: string
+                example: '0.0076'
+                description: The withdrawal fee as a decimal string.
+              createdAt:
+                type: string
+                format: date-time
+                example: '2026-05-18T08:58:06.538Z'
+                description: The creation time of the withdrawal.
+
+    privateGetWithdrawalHistoryRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetWithdrawalHistory**.
+            type: string
+            example: privateGetWithdrawalHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset for which you want to retrieve past withdrawals. If not specified, all withdrawals are returned.
+            type: string
+            example: BTC
+          limit:
+            description: The maximum number of withdrawals to return, from latest to earliest.
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 500
+          start:
+            description: The Unix timestamp in milliseconds starting from which to return withdrawals.
+            type: integer
+            example: 1622548800000
+          end:
+            description: The Unix timestamp in milliseconds up to which to return withdrawals.
+            type: integer
+            example: 1622635200000
+
+    privateGetWithdrawalHistoryResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetWithdrawalHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              timestamp:
+                description: The Unix timestamp in milliseconds when the withdrawal was made.
+                type: integer
+                example: 1542967486256
+              symbol:
+                type: string
+                example: BTC
+                description: The asset that was withdrawn.
+              amount:
+                description: The quantity of the asset that was withdrawn.
+                type: string
+                example: '0.99994'
+              address:
+                description: The address where the withdrawal was made.
+                type: string
+                example: BitcoinAddress
+              paymentId:
+                description: |
+                  The unique identifier of the withdrawal. It is sometimes called *note*, *memo*, or *tag*. Not returned if not specified in the request.
+                type: string
+                example: '10002653'
+              txId:
+                description: The unique identifier of the transaction on the blockchain.
+                type: string
+                example: 927b3ea50c5bb52c6854152d305dfa1e27fc01d10464cf10825d96d69d235eb3
+              fee:
+                description: The [transaction fee](https://bitvavo.com/en/fees) for a withdrawal on Bitvavo.
+                type: string
+                example: '0.00006'
+              status:
+                description: The status of the withdrawal.
+                type: string
+                enum: [awaiting_processing, awaiting_email_confirmation, awaiting_bitvavo_inspection, approved, sending, in_mempool, processed, completed, canceled]
+
+    # =========================================================================
+    # Account messages
+    # =========================================================================
+
+    privateGetAccountRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetAccount**.
+            type: string
+            example: privateGetAccount
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+
+    privateGetAccountResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetAccount
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              fees:
+                type: object
+                description: The trading fees and volume for your account.
+                properties:
+                  taker:
+                    description: The fee for trades that take liquidity from the order book.
+                    type: string
+                    example: '0.0025'
+                  maker:
+                    description: The fee for trades that add liquidity to the order book.
+                    type: string
+                    example: '0.0015'
+                  volume:
+                    description: Your trading volume in the last 30 days measured in EUR.
+                    type: string
+                    example: '10000.00'
+
+    privateGetBalanceRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetBalance**.
+            type: string
+            example: privateGetBalance
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset for which you want to return the balance. If not specified, returns the balance for all assets above zero.
+            type: string
+            example: BTC
+
+    privateGetBalanceResponse:
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            action:
+              description: The action performed.
+              type: string
+              example: privateGetBalance
+            requestId:
+              description: Your identifier for the request.
+              type: integer
+              example: 1
+            response:
+              type: object
+              properties:
+                symbol:
+                  description: The asset for which the balance was returned.
+                  type: string
+                  example: BTC
+                available:
+                  description: The balance that is available for use.
+                  type: string
+                  example: '1.57593193'
+                inOrder:
+                  description: The balance that is currently reserved for open orders.
+                  type: string
+                  example: '0.74832374'
+
+    privateGetFeesRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetFees**.
+            type: string
+            example: privateGetFees
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to get fee information. If not specified, returns the fees for your current tier in [Category A](https://bitvavo.com/en/fees).
+            type: string
+            example: BTC-EUR
+          quote:
+            description: |
+              The quote currency for which to get fee information. If not specified, returns the fees for your current tier in [Category A](https://bitvavo.com/en/fees).
+            type: string
+            enum: [EUR, USDC]
+            example: EUR
+
+    privateGetFeesResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetFees
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              tier:
+                description: |
+                  The [price tier](https://bitvavo.com/en/fees) used to calculate your trading fees.
+                  > The first tier in the Bitvavo fee structure is **0**.
+                type: string
+                example: '0'
+              volume:
+                description: Your trading volume over the last 30 days in EUR.
+                type: string
+                example: '10000.00'
+              taker:
+                description: The fee for trades that take liquidity from the order book.
+                type: string
+                example: '0.0025'
+              maker:
+                description: The fee for trades that add liquidity to the order book.
+                type: string
+                example: '0.0015'
+
+    privateGetTransactionHistoryRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **privateGetTransactionHistory**.
+            type: string
+            example: privateGetTransactionHistory
+          requestId:
+            description: Your identifier for the request.
+            type: string
+            example: 1
+          fromDate:
+            description: The Unix timestamp in milliseconds starting from which to return transactions.
+            type: integer
+            example: 1751328000000
+          toDate:
+            description: The Unix timestamp in milliseconds up to which to return transactions.
+            type: integer
+            example: 1754006399000
+          page:
+            description: The page number for the transaction history.
+            type: integer
+            minimum: 1
+            example: 1
+          maxItems:
+            description: The maximum number of items per page in the transaction history.
+            type: integer
+            minimum: 1
+            maximum: 100
+            example: 100
+          type:
+            description: The type of transaction to return.
+            type: string
+            enum: [sell, buy, staking, fixed_staking, deposit, withdrawal, affiliate, distribution, internal_transfer, withdrawal_cancelled, rebate, loan, external_transferred_funds, manually_assigned]
+
+    privateGetTransactionHistoryResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: privateGetTransactionHistory
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              currentPage:
+                description: The current page number.
+                type: integer
+                example: 1
+              totalPages:
+                description: The total number of returned pages.
+                type: integer
+                example: 1
+              maxItems:
+                description: The maximum number of transactions per page.
+                type: integer
+                example: 100
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    transactionId:
+                      description: The unique identifier of the transaction.
+                      type: string
+                      example: '5f5e7b3b-4f5b-4b2d-8b2f-4f2b5b3f5e5f'
+                    executedAt:
+                      description: The Unix timestamp when the transaction was executed.
+                      type: string
+                      format: date-time
+                      example: '2021-01-01T00:00:00.000Z'
+                    type:
+                      description: The type of transaction.
+                      type: string
+                      enum: [sell, buy, staking, fixed_staking, deposit, withdrawal, affiliate, distribution, internal_transfer, withdrawal_cancelled, rebate, loan, external_transferred_funds, manually_assigned, manually_assigned_bitvavo]
+                    priceCurrency:
+                      description: The currency in which the transaction was made.
+                      type: string
+                      example: EUR
+                    priceAmount:
+                      description: The amount of the transaction.
+                      type: string
+                      example: '1000.00'
+                    sentCurrency:
+                      description: The currency that was sent in the transaction.
+                      type: string
+                      example: EUR
+                    sentAmount:
+                      description: The amount that was sent in the transaction.
+                      type: string
+                      example: '0.1'
+                    receivedCurrency:
+                      description: The currency that was received in the transaction.
+                      type: string
+                      example: BTC
+                    receivedAmount:
+                      description: The amount that was received in the transaction.
+                      type: string
+                      example: '0.0001'
+                    feesCurrency:
+                      description: The currency in which the fees were paid.
+                      type: string
+                      example: EUR
+                    feesAmount:
+                      description: The amount of fees paid in the transaction.
+                      type: string
+                      example: '0.01'
+                    address:
+                      description: The address where the transaction was made.
+                      type: string
+                      nullable: true
+
+    # =========================================================================
+    # Synchronization messages
+    # =========================================================================
+
+    getTimeRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **getTime**.
+            type: string
+            example: getTime
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+
+    getTimeResponse:
+      payload:
+        type: object
+        properties:
+          action:
+            description: The action performed.
+            type: string
+            example: getTime
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          response:
+            type: object
+            properties:
+              time:
+                description: The current Unix timestamp in milliseconds of Bitvavo servers.
+                type: integer
+                example: 1539180275424
+              timeNs:
+                description: The current Unix timestamp of Bitvavo servers in nanoseconds.
+                type: integer
+                example: 1752139200000000000
+
+    getMarketsRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **getMarkets**.
+            type: string
+            example: getMarkets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          market:
+            description: The market for which to return information.
+            type: string
+            example: BTC-EUR
+
+    getMarketsResponse:
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            action:
+              description: The action performed.
+              type: string
+              example: getMarkets
+            requestId:
+              description: Your identifier for the request.
+              type: integer
+              example: 1
+            response:
+              type: object
+              properties:
+                market:
+                  description: The market for which you requested information.
+                  type: string
+                  example: BTC-EUR
+                status:
+                  description: |
+                    The [status of the market](/docs/order-lifecycle/#market-status) for which you requested information.
+                    To learn how markets in different statuses work, see [Trading Rules](https://bitvavo.com/en/trading-rules).
+                  type: string
+                  enum: [trading, halted, auction, auctionMatching, cancelOnly]
+                  example: trading
+                base:
+                  description: The base currency of the specified market.
+                  type: string
+                  example: BTC
+                quote:
+                  description: The quote currency of the specified market.
+                  type: string
+                  example: EUR
+                pricePrecision:
+                  description: The number of digits allowed in the price when the order was created.
+                  type: integer
+                  example: 5
+                  deprecated: true
+                minOrderInBaseAsset:
+                  description: The minimum amount of base currency for an order.
+                  type: string
+                  example: '0.00006100'
+                minOrderInQuoteAsset:
+                  description: The minimum amount of quote currency for an order.
+                  type: string
+                  example: '5.00'
+                maxOrderInBaseAsset:
+                  description: The maximum amount of base currency for an order.
+                  type: string
+                  example: '1000000000.00000000'
+                maxOrderInQuoteAsset:
+                  description: The maximum amount of quote currency for an order.
+                  type: string
+                  example: '1000000000.00'
+                quantityDecimals:
+                  description: The maximum number of decimals in the `amount` of an order.
+                  type: integer
+                  example: 8
+                notionalDecimals:
+                  description: The maximum number of decimal places allowed for `amountQuote` (quote currency amount).
+                  type: integer
+                  example: 2
+                tickSize:
+                  description: The minimum price increment of the market.
+                  type: string
+                  example: '0.00001'
+                maxOpenOrders:
+                  description: The maximum number of open orders allowed in a market per account.
+                  type: integer
+                  example: 100
+                feeCategory:
+                  description: The [fee category](https://bitvavo.com/en/fees) of the specified market.
+                  type: string
+                  enum: [A, B, C]
+                  example: A
+                orderTypes:
+                  description: The types of orders that can be placed in the specified market.
+                  type: array
+                  items:
+                    type: string
+                    enum: [market, limit, stopLoss, stopLossLimit, takeProfit, takeProfitLimit]
+                  example: [market, limit, stopLoss, stopLossLimit, takeProfit, takeProfitLimit]
+
+    getAssetsRequest:
+      payload:
+        type: object
+        properties:
+          action:
+            description: Set value to **getAssets**.
+            type: string
+            example: getAssets
+          requestId:
+            description: Your identifier for the request.
+            type: integer
+            example: 1
+          symbol:
+            description: The asset for which to return the information. If not specified, all supported assets are returned.
+            type: string
+            example: BTC
+
+    getAssetsResponse:
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            action:
+              description: The action performed.
+              type: string
+              example: getAssets
+            requestId:
+              description: Your identifier for the request.
+              type: integer
+              example: 1
+            response:
+              type: object
+              properties:
+                symbol:
+                  description: The asset for which the information is returned.
+                  type: string
+                  example: BTC
+                name:
+                  description: The full name of the asset.
+                  type: string
+                  example: Bitcoin
+                decimals:
+                  description: The number of decimal digits for this asset.
+                  type: integer
+                  example: 8
+                depositFee:
+                  description: The fee for depositing the asset.
+                  type: string
+                  example: '0'
+                depositConfirmations:
+                  description: The minimum number of network confirmations to credit the asset to your account.
+                  type: integer
+                  example: 10
+                depositStatus:
+                  description: The status of the asset being deposited.
+                  type: string
+                  enum: [OK, MAINTENANCE, DELISTED]
+                withdrawalFee:
+                  description: The fee for withdrawing the asset.
+                  type: string
+                  example: '0.2'
+                withdrawalMinAmount:
+                  description: The minimum amount that can be withdrawn.
+                  type: string
+                  example: '0.2'
+                withdrawalStatus:
+                  description: The status of the asset being withdrawn.
+                  type: string
+                  enum: [OK, MAINTENANCE, DELISTED]
+                networks:
+                  type: array
+                  description: The list of supported networks.
+                  items:
+                    type: string
+                  example: [Mainnet]
+                message:
+                  description: The reason if the `withdrawalStatus` or `depositStatus` is not `OK`.
+                  type: string
+                  example: ''
+
+    # =========================================================================
+    # Subscription messages
+    # =========================================================================
+
+    subscriptionRequest:
+      description: Generic subscribe/unsubscribe request for market data channels.
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                markets:
+                  description: The markets for which you want to stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    tickerSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: ticker
+                markets:
+                  description: |
+                    The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    ticker24hSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: ticker24h
+                markets:
+                  description: |
+                    The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    tradesSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: trades
+                markets:
+                  description: |
+                    The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    bookSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: book
+                markets:
+                  description: |
+                    The markets for which you want stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    accountSubscriptionRequest:
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: account
+                markets:
+                  description: |
+                    The markets for which you want stream the data.
+
+                    <br/>
+
+                    > You can subscribe to all currently listed markets. Instead of an array of markets, use `*` as the value: `"markets": "*"`.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+
+    candlesSubscriptionRequest:
+      description: Subscribe/unsubscribe request for the candles channel (includes interval parameter).
+      payload:
+        type: object
+        required:
+          - action
+          - channels
+        properties:
+          action:
+            description: Set to **subscribe** to start or to **unsubscribe** to stop the subscription.
+            type: string
+            enum: [subscribe, unsubscribe]
+          channels:
+            description: The events you want to subscribe to.
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  description: The channel to which you want to subscribe.
+                  type: string
+                  example: candles
+                markets:
+                  description: The markets for which you want to stream the data.
+                  type: array
+                  items:
+                    type: string
+                  example: [BTC-EUR]
+                interval:
+                  description: The time period for which to return the candlestick data.
+                  type: array
+                  items:
+                    type: string
+                    enum: [1m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d]
+
+    tickerSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              ticker:
+                description: All markets for which to stream ticker data.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    tickerEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: ticker
+          market:
+            description: The market to which you subscribed.
+            type: string
+            example: BTC-EUR
+          bestBid:
+            description: The highest offered price for the asset.
+            type: string
+            example: '9156.8'
+          bestBidSize:
+            description: The size of the `bestBid`.
+            type: string
+            example: '0.12840531'
+          bestAsk:
+            description: The lowest asked price for the asset.
+            type: string
+            example: '9157.9'
+          bestAskSize:
+            description: The size of the `bestAsk`.
+            type: string
+            example: '0.1286605'
+          lastPrice:
+            description: The last price at which a trade occurred.
+            type: string
+            example: '9156.9'
+
+    ticker24hSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              ticker24h:
+                description: All markets for which to stream 24h ticker data.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    ticker24hEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: ticker24h
+          data:
+            description: The object with the ticker data for the last 24 hours.
+            type: object
+            properties:
+              market:
+                description: The market to which you subscribed.
+                type: string
+                example: BTC-EUR
+              timestamp:
+                description: The Unix timestamp in milliseconds of when the ticker is created.
+                type: integer
+                example: 1566564813057
+              open:
+                description: The open price in the last 24 hours.
+                type: string
+                example: '9072.9'
+              high:
+                description: The highest offered price in the last 24 hours.
+                type: string
+                example: '9263.6'
+              low:
+                description: The lowest asked price in the last 24 hours.
+                type: string
+                example: '9062.8'
+              last:
+                description: The latest trade price in the last 24 hours.
+                type: string
+                example: '9231.8'
+              bid:
+                description: The highest offered price at the moment.
+                type: string
+                example: '9225'
+              bidSize:
+                description: The size of the highest offer.
+                type: string
+                example: '1.14732373'
+              ask:
+                description: The lowest asked price at the moment.
+                type: string
+                example: '9225.1'
+              askSize:
+                description: The size of the lowest ask.
+                type: string
+                example: '0.65371786'
+              volume:
+                description: The total traded volume in base currency in the last 24 hours.
+                type: string
+                example: '85.70530211'
+              volumeQuote:
+                description: The total traded volume in quote currency in the last 24 hours.
+                type: string
+                example: '785714.14'
+
+    candlesSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              candles:
+                description: The object with all current candles subscriptions.
+                type: object
+                properties:
+                  1h:
+                    description: The markets for which you want stream the data per interval.
+                    type: array
+                    items:
+                      type: string
+                    example: [BTC-EUR]
+
+    candlesEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: candles
+          market:
+            description: The markets for which you want stream the data.
+            type: string
+            example: BTC-EUR
+          interval:
+            description: The time period for which to return the candlestick data.
+            type: string
+            example: 1h
+          candle:
+            description: An array with the candlestick data for the specified time period. It contains a timestamp, open, high, low, close, and volume values in that order.
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+            example:
+              - ['1538784000000', '4999', '5012', '4999', '5012', '0.45']
+
+    tradesSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              trades:
+                description: The markets for which to stream trades.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    tradesEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: trade
+          id:
+            description: The unique identifier of a trade.
+            type: string
+            example: 391f4d94-485f-4fb0-b11f-39da1cfcfc2d
+          amount:
+            description: The amount of base currency exchanged in the trade.
+            type: string
+            example: '0.00096361'
+          price:
+            description: The price in quote currency for which the trade was made.
+            type: string
+            example: '9311.2'
+          timestamp:
+            description: The Unix timestamp in milliseconds of when the trade was made.
+            type: integer
+            example: 1566817150381
+          market:
+            description: The market in which the trade occurred.
+            type: string
+            example: BTC-EUR
+          side:
+            description: Indicates if the taker made the order to buy or sell an asset.
+            type: string
+            enum: [sell, buy]
+          timestampNs:
+            description: The Unix timestamp in nanoseconds of when the trade was made.
+            type: integer
+            example: 1752139200000000000
+
+    bookSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: book
+          subscriptions:
+            description: The object with all currently active subscriptions.
+            type: object
+            properties:
+              book:
+                description: The markets for which to stream order book data.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR]
+
+    bookEvent:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: book
+          market:
+            description: The market to which you subscribed.
+            type: string
+            example: BTC-EUR
+          nonce:
+            description: Unique identifier of the market data in the order book at a specific time.
+            type: integer
+            example: 0
+          bids:
+            description: All bids with the price and the size. Bids with size **0** are no longer available at that price.
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+            example:
+              - - '9209.3'
+                - '0.015'
+          asks:
+            description: All asks with the price and the size. Asks with size **0** are no longer available at that price.
+            type: array
+            items:
+              type: array
+              items:
+                type: string
+            example:
+              - - '9220.2'
+                - '0.015'
+          timestamp:
+            description: The Unix timestamp in nanoseconds of the last transaction event.
+            type: integer
+            example: 1752139200000000000
+
+    accountSubscriptionConfirmation:
+      payload:
+        type: object
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: subscribed
+          subscriptions:
+            description: Object containing all current active subscriptions.
+            type: object
+            properties:
+              channel-name:
+                description: The markets you subscribed to for the account.
+                type: array
+                items:
+                  type: string
+                example: [BTC-EUR, ETH-BTC, ETH-EUR]
+
+    accountOrderEvent:
+      payload:
+        $ref: '#/components/schemas/AccountOrderEvent'
+
+    accountFillEvent:
+      payload:
+        type: object
+        required:
+          - operatorId
+        properties:
+          event:
+            description: The returned event.
+            type: string
+            example: fill
+          market:
+            description: The market in which the order was placed.
+            type: string
+            example: BTC-EUR
+          orderId:
+            description: The identifier of the order on which has been filled.
+            type: string
+            format: UUID
+            example: 80b5f04d-21fc-4ebe-9c5f-6d34f78ee477
+          clientOrderId:
+            description: Your identifier of the order. Only returned if specified in the request.
+            type: string
+            format: UUID
+            example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+          operatorId:
+            description: The identifier for the trader or the bot that made the request.
+            type: integer
+            format: int64
+            example: 543462
+          fillId:
+            description: The identifier of the returned fill.
+            type: string
+            example: 15d14b09-389d-4f83-9413-de9d0d8e7715
+          timestamp:
+            description: The current Unix timestamp in milliseconds.
+            type: integer
+            example: 1542967486256
+          amount:
+            description: The amount in base currency for which the trade has been made.
+            type: string
+            example: '0.005'
+          side:
+            description: Indicates if the order was to buy or sell an asset.
+            type: string
+            enum: [sell, buy]
+          price:
+            description: The price in quote currency for which the trade has been made.
+            type: string
+            example: '5000.1'
+          taker:
+            description: |
+              Indicates if you are the taker or maker in the trade.
+
+              - `true`: you are the taker. Your order filled a resting order.
+              - `false`: you are the maker. Your resting order was filled by an incoming order.
+            type: boolean
+            example: true
+          fee:
+            description: |
+              The amount you pay Bitvavo in `feeCurrency` to process `orderId`. For more information about your fees, call
+              GET [/account/fees](/docs/rest-api/get-market-fees).
+
+
+              If settled is `false`, this object is not included in these return parameters.
+              To retrieve the value of `settled`, see the `fills` object in the return parameters for calls to
+              GET [`/order`](/docs/rest-api/get-order).
+
+
+              `fee` is negative for rebates.
+            type: string
+            example: '0.03'
+          feeCurrency:
+            description: |
+              The currency that `fee` is paid in.
+
+
+              If settled is `false`, this object is not included in these return parameters.
+              To retrieve the value of `settled`, see the `fills` object in the return parameters for calls to 
+              GET [`/order`](/docs/rest-api/get-order).
+            type: string
+            example: EUR
+          timestampNs:
+            description: The current Unix timestamp in nanoseconds.
+            type: integer
+            example: 1752139200000000000
+
+  # ===========================================================================
+  # Reusable schemas
+  # ===========================================================================
+
+  schemas:
+
+    OrderResponseFull:
+      type: object
+      properties:
+        action:
+          description: The action performed.
+          type: string
+        requestId:
+          description: Your identifier for the request.
+          type: integer
+          example: 1
+        response:
+          type: object
+          properties:
+            orderId:
+              type: string
+              format: UUID
+              description: |
+                Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+              example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+            clientOrderId:
+              description: Your identifier of the order. Only returned if specified in the request.
+              type: string
+              format: UUID
+              example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+            market:
+              type: string
+              example: BTC-EUR
+              description: The market where you created an order.
+            created:
+              description: The Unix timestamp in milliseconds when the order was created.
+              type: integer
+              example: 1706100650751
+            updated:
+              description: The Unix timestamp in milliseconds when the order was last updated.
+              type: integer
+              example: 1706100650751
+            status:
+              description: |
+                The status of an order. Possible values:
+                - `new`: the `orderId` has been added to the order book and has not been filled.
+                - `awaitingTrigger`: the conditions to fill an order haven't been met. 
+                - `canceled`: the `orderId` has been removed from the order book. 
+                - `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.
+                - `filled`: all trades necessary to complete the order have been filled. 
+                - `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.
+              type: string
+              enum: [new, awaitingTrigger, canceled, expired, filled, partiallyFilled]
+            side:
+              description: Indicates whether the order is to buy or sell the asset.
+              type: string
+              enum: [buy, sell]
+            orderType:
+              description: The type of order you created.
+              type: string
+              enum: [limit, market]
+            amount:
+              description: |
+                The quantity of the base currency to buy or sell.
+                If you set `amountQuote` in your order, `amount` is not returned.
+              type: string
+              example: '10'
+            amountRemaining:
+              description: |
+                The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+                If you set `amountQuote` in your order, `amountRemaining` is not returned.
+              type: string
+              example: '10'
+            price:
+              description: |
+                The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+                For other types of orders, the `price` is not returned.
+              type: string
+              example: '7000'
+            amountQuote:
+              description: |
+                The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. 
+                If you set `amount` in your order, `amountQuote` is not returned.
+              type: string
+              example: '5000'
+            amountQuoteRemaining:
+              description: |
+                The quantity of the quote currency remaining after the sum of all fills is 
+                subtracted from `amountQuote`.
+
+                If you set `amount` in the order, `amountQuoteRemaining` is not returned.
+              type: string
+              example: '5000'
+            onHold:
+              description: |
+                The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+                All funds are released when order is filled.
+              type: string
+              example: '70000'
+            onHoldCurrency:
+              description: |
+                The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+              type: string
+              example: EUR
+            triggerPrice:
+              description: |
+                The price calculated using `triggerAmount` and 
+                `triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` 
+                types of orders.   
+
+                For example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` 
+                when the `triggerReference` price in quote currency reaches 4000.
+              type: string
+              example: '4000'
+            triggerAmount:
+              description: |
+                The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  
+                This value and `triggerType` are used to calculate `triggerPrice`.
+              type: string
+              example: '4000'
+            triggerType:
+              description: |
+                The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+              type: string
+              enum: [price]
+            triggerReference:
+              description: |
+                The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+              type: string
+              enum: [lastTrade, bestBid, bestAsk, midPrice]
+            filledAmount:
+              description: The total amount bought or sold in base currency.
+              type: string
+              example: '0'
+            filledAmountQuote:
+              description: The total amount bought or sold in quote currency.
+              type: string
+              example: '0'
+            feePaid:
+              description: |
+                The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+                GET [/account/fees](/docs/rest-api/get-market-fees).
+              type: string
+              example: '0'
+            feeCurrency:
+              description: The currency of the `feePaid`.
+              type: string
+              example: EUR
+            fills:
+              description: A JSON object containing all fills for `orderId`.
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    description: The identifier of this fill.
+                    type: string
+                    example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                  timestamp:
+                    description: The Unix timestamp in milliseconds when Bitvavo processed the fill.
+                    type: integer
+                    example: 1542967486256
+                  amount:
+                    description: The amount of base currency exchanged in the fill.
+                    type: string
+                    example: '0.005'
+                  price:
+                    description: The price of the fill in quote currency.
+                    type: string
+                    example: '5000.1'
+                  taker:
+                    description: Returns `true` when you are the taker for the fill.
+                    type: boolean
+                    example: true
+                  fee:
+                    description: |
+                      The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see 
+                      GET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.
+
+                      If `settled` is `false`, this parameter is not included in the return parameters.
+                    type: string
+                    example: '0.03'
+                  feeCurrency:
+                    description: |
+                      The currency that the `fee` is paid in.
+
+                      If `settled` is `false`, this object is not returned.
+                    type: string
+                    example: EUR
+                  settled:
+                    description: |
+                      On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet 
+                      paid, `settled` is `false`.
+                    type: boolean
+            selfTradePrevention:
+              description: |
+                **[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.
+
+                Indicates how to prevent self-trading for conflicting orders of any type.
+
+                Possible values:
+                  - `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order.
+                For example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.
+                - `cancelOldest`: cancels the older conflicting order in the same market.
+                - `cancelNewest`: cancels the later conflicting order in the same market.
+                - `cancelBoth`: cancels both conflicting orders in the same market.
+              type: string
+              enum: [decrementAndCancel, cancelOldest, cancelNewest, cancelBoth]
+            visible:
+              description: |
+                Returns `true` when the `orderId` is visible in the [order book](/docs/websocket-api/get-order-book) for a `market`.
+              type: boolean
+            timeInForce:
+              description: The value you set for how long an order stays active.
+              type: string
+              enum: [GTC, IOC, FOK]
+            postOnly:
+              description: |
+                If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+              type: boolean
+            disableMarketProtection:
+              description: Must be **false** because market protection can no longer be disabled.
+              type: boolean
+              deprecated: true
+            operatorId:
+              description: Your identifier for the trader or the bot within your account.
+              type: integer
+              format: int64
+              example: 543462
+            restatementReason:
+              description: |
+                Specifies the reason why the status of the order was changed. For example, when an order is canceled by the [Price protection checks](/docs/order-lifecycle/#price-protection).
+              type: string
+              enum: [decrementOnSelfTradePrevention, cancelOnSelfTradePrevention, cancelOnPlacementPriceProtection, cancelOnExecutionPriceProtection, cancelOnSpreadProtection, cancelOnReferencePriceProtection, cancelPostOnlyOnAuctionMatching, cancelOnMaintenance, cancelOnDisconnect, cancelOnDelisting, cancelOnLockPlaced, cancelOnAdminRequest, cancelPostOnly]
+            createdNs:
+              description: The Unix timestamp in nanoseconds when the order was created.
+              type: integer
+              example: 1752139200000000000
+            updatedNs:
+              description: The Unix timestamp in nanoseconds when the order was last updated.
+              type: integer
+              example: 1752139200000000000
+            codGroupId:
+              type: integer
+              example: 1
+              description: Your identifier for a [group of orders](/docs/websocket-api/cancel-orders-after/).
+
+    OrderResponseMinimal:
+      type: object
+      properties:
+        action:
+          description: The action performed.
+          type: string
+        requestId:
+          description: Your identifier for the request.
+          type: integer
+          example: 1
+        response:
+          type: object
+          properties:
+            market:
+              type: string
+              example: BTC-EUR
+              description: The market where you created an order.
+            orderId:
+              type: string
+              format: UUID
+              description: The identifier of the order.
+              example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+            clientOrderId:
+              description: Your identifier of the order. Only returned if specified in the request.
+              type: string
+              format: UUID
+              example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+            created:
+              description: The Unix timestamp in milliseconds when the order was created.
+              type: integer
+              example: 1706100650751
+            updated:
+              description: The Unix timestamp in milliseconds when the order was last updated.
+              type: integer
+              example: 1706100650751
+            createdNs:
+              description: The Unix timestamp in nanoseconds when the order was created.
+              type: integer
+              example: 1752139200000000000
+            updatedNs:
+              description: The Unix timestamp in nanoseconds when the order was last updated.
+              type: integer
+              example: 1752139200000000000
+
+    AccountOrderEvent:
+      type: object
+      required:
+        - operatorId
+      properties:
+        event:
+          description: The returned event.
+          type: string
+          example: order
+        orderId:
+          description: |
+            Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+          type: string
+          format: UUID
+          example: 80b5f04d-21fc-4ebe-9c5f-6d34f78ee477
+        clientOrderId:
+          description: Your identifier of the order. Only returned if specified in the request.
+          type: string
+          format: UUID
+          example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+        operatorId:
+          description: Teh identifier for the trader or the bot that made the request.
+          type: integer
+          format: int64
+          example: 543462
+        market:
+          description: The market in which the order was placed.
+          type: string
+          example: BTC-EUR
+        created:
+          description: The Unix timestamp in milliseconds when the order was created.
+          type: integer
+          example: 1548684420771
+        updated:
+          description: The Unix timestamp in milliseconds when the order was last updated.
+          type: integer
+          example: 1548684420771
+        status:
+          description: The current status of the order.
+          type: string
+          enum: [new, awaitingTrigger, canceled, expired, filled, partiallyFilled]
+        side:
+          description: Indicates whether the order is to buy or sell the asset.
+          type: string
+          enum: [buy, sell]
+        orderType:
+          description: The type of order you created.
+          type: string
+          enum: [limit, market]
+        amount:
+          description: The quantity of the base currency to buy or sell.
+          type: string
+          example: '1'
+        amountRemaining:
+          description: |
+            The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+          type: string
+          example: '0.567'
+        price:
+          description: The price of the order.
+          type: string
+          example: '9225.1'
+        onHold:
+          description: |
+            The amount of 'onHoldCurrency' that is reserved for this order. This is released when orders are canceled.
+          type: string
+          example: '9225.1'
+        onHoldCurrency:
+          description: |
+            The currency that is `onHold` while the order is processed. This is the quote currency for buy orders and base currency for sell orders.
+          type: string
+          example: EUR
+        triggerPrice:
+          description: |
+            The price calculated using `triggerAmount` and `triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+          type: string
+          example: '4000'
+        triggerAmount:
+          description: |
+            The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.
+            This value and `triggerType` are used to calculate `triggerPrice`.
+          type: string
+          example: '4000'
+        triggerType:
+          description: |
+            The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+          type: string
+          enum: [price]
+        triggerReference:
+          description: |
+            The reference price which triggered the order to be filled for `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+          type: string
+          enum: [lastTrade, bestBid, bestAsk, midPrice]
+        timeInForce:
+          description: |
+            **Only for limit orders**. How long an `orderType` stays active for.
+
+            Possible values:
+
+            - `FOK`: *Fill-Or-Kill*. Fills the entire order from existing orders, or cancels the entire order.
+            - `GTC`: *Good-Til-Canceled*. Stays in the order book until the entire order is filled or you manually cancel it.
+            - `IOC`: *Immediate-Or-Cancel*. Fills existing orders and cancels the unfilled balance.
+          type: string
+          enum: [GTC, IOC, FOK]
+        postOnly:
+          description: |
+            If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+          type: boolean
+          default: false
+        selfTradePrevention:
+          description: |
+              **[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.
+
+              Indicates how to prevent self-trading for conflicting orders of any type.
+
+              Possible values:
+              - `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order. 
+              For example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.
+              - `cancelOldest`: cancels the older conflicting order in the same market.
+              - `cancelNewest`: cancels the later conflicting order in the same market.
+              - `cancelBoth`: cancels both conflicting orders in the same market.
+          type: string
+          enum: [decrementAndCancel, cancelOldest, cancelNewest, cancelBoth]
+          default: decrementAndCancel
+        visible:
+          description: Whether this order is visible in the order book.
+          type: boolean
+        filledAmount:
+          type: string
+          example: '1.234'
+          description: The total amount of the base currency that has been filled.
+        filledAmountQuote:
+          type: string
+          example: '5000'
+          description: The total amount of the quote currency that has been filled.
+        executionType:
+          description: The type of update executed for the order.
+          type: string
+          enum: [new, trade, canceled, expired, updated, triggered, restated]
+        restatementReason:
+          description: |
+            Specifies the reason why the status of the order was changed. For example, when an order is canceled by the [Price protection checks](/docs/order-lifecycle/#price-protection).
+          type: string
+          enum: [decrementOnSelfTradePrevention, cancelOnSelfTradePrevention, cancelOnPlacementPriceProtection, cancelOnExecutionPriceProtection, cancelOnSpreadProtection, cancelOnReferencePriceProtection, cancelPostOnlyOnAuctionMatching, cancelOnMaintenance, cancelOnDisconnect, cancelOnDelisting, cancelOnLockPlaced, cancelOnAdminRequest, cancelPostOnly]
+        createdNs:
+          description: The Unix timestamp in nanoseconds when the order was created.
+          type: integer
+          example: 1752139200000000000
+        updatedNs:
+          description: The Unix timestamp in nanoseconds when the order was last updated.
+          type: integer
+          example: 1752139200000000000
+        codGroupId:
+          type: integer
+          example: 1
+          description: Your identifier for a [group of orders](/docs/websocket-api/cancel-orders-after/).
