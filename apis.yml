@@ -75,30 +75,15 @@ common:
   url: security/bitvavo-domain-security.yml
 
 apis:
-- aid: bitvavo:exchange-rest-api
-  name: Bitvavo REST API
-  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
-  humanURL: https://docs.bitvavo.com/
-  baseURL: https://api.bitvavo.com/v2
-  tags: [Trading, Market Data, Cryptocurrency]
-  properties:
-  - type: OpenAPI
-    url: openapi/bitvavo-exchange-rest-openapi.yml
-  - type: Documentation
-    url: https://docs.bitvavo.com/
-- aid: bitvavo:institutional-api
-  name: Bitvavo Institutional API
-  description: Institutional API published by Bitvavo on docs.bitvavo.com.
-  humanURL: https://docs.bitvavo.com/
-  tags: [Institutional, Cryptocurrency]
-  properties:
-  - type: OpenAPI
-    url: openapi/bitvavo-institutional-openapi.yml
 - aid: bitvavo:websocket-api
   name: Bitvavo WebSocket API
-  description: Real-time WebSocket API for market data, trading, transfers, and account management on Bitvavo.
+  description: >-
+    Real-time WebSocket API for market data, trading, transfers, and account management on Bitvavo.
   humanURL: https://docs.bitvavo.com/
-  tags: [WebSocket, Trading, Market Data]
+  tags:
+  - WebSocket
+  - Trading
+  - Market Data
   properties:
   - type: AsyncAPI
     url: asyncapi/bitvavo-exchange-websocket-asyncapi.yml
@@ -106,15 +91,109 @@ apis:
   name: Bitvavo Market Data Pro WebSocket API
   description: Market Data Pro WebSocket API published by Bitvavo.
   humanURL: https://docs.bitvavo.com/
-  tags: [WebSocket, Market Data]
+  tags:
+  - WebSocket
+  - Market Data
   properties:
   - type: AsyncAPI
     url: asyncapi/bitvavo-market-data-pro-asyncapi.yml
 - aid: bitvavo:fix-api
   name: Bitvavo FIX API
-  description: FIX protocol API; the FIX dictionary is published at docs.bitvavo.com/api-specs/2026-04-28.fix.xml.
+  description: >-
+    FIX protocol API; the FIX dictionary is published at docs.bitvavo.com/api-specs/2026-04-28.fix.xml.
   humanURL: https://docs.bitvavo.com/
-  tags: [FIX, Trading]
+  tags:
+  - FIX
+  - Trading
   properties:
   - type: Documentation
     url: https://docs.bitvavo.com/api-specs/2026-04-28.fix.xml
+- aid: bitvavo:bitvavo-account-api
+  name: Bitvavo Account API
+  description: Get information about your Bitvavo account.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-account-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-account-management-api
+  name: Bitvavo Account Management API
+  description: >-
+    Create and manage multiple subaccounts under one main account and transfer funds between them.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Account Management
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-account-management-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-market-data-api
+  name: Bitvavo Market data API
+  description: Get the latest information about markets, trades, and candles on Bitvavo.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Market data
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-market-data-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-subaccounts-api
+  name: Bitvavo Subaccounts API
+  description: Get information about your subaccounts and manage orders.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Subaccounts
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-subaccounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-synchronization-api
+  name: Bitvavo Synchronization API
+  description: Synchronize markets and assets data with your app.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Synchronization
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-synchronization-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-trading-api
+  name: Bitvavo Trading API
+  description: Manage your orders and trades on Bitvavo.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Trading
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-trading-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+- aid: bitvavo:bitvavo-transfer-api
+  name: Bitvavo Transfer API
+  description: Deposit and withdraw funds on Bitvavo.
+  humanURL: https://docs.bitvavo.com/
+  baseURL: https://api.bitvavo.com/v2
+  tags:
+  - Transfer
+  properties:
+  - type: OpenAPI
+    url: openapi/bitvavo-transfer-api-openapi.yml
+  - type: Documentation
+    url: https://docs.bitvavo.com/
+x-enrichment:
+  date: '2026-10-13'
+  status: enriched
+  pass: local-v1

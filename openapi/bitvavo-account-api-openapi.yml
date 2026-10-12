@@ -1,0 +1,458 @@
+openapi: 3.2.0
+info:
+  title: Bitvavo REST Account API
+  version: 2.10.0
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Account
+  description: Get information about your Bitvavo account.
+paths:
+  /account:
+    get:
+      tags:
+      - Account
+      summary: Get account fees
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns your current trading fees from the default Category A based on the trading volume of your account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.account((error, response) => {\n  if (error == null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.account()\nprint(response)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.Account() if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fees:
+                    type: object
+                    description: The trading fees and volume for your account.
+                    properties:
+                      taker:
+                        description: The fee for trades that take liquidity from the order book.
+                        type: string
+                        example: '0.0025'
+                      maker:
+                        description: The fee for trades that add liquidity to the order book.
+                        type: string
+                        example: '0.0015'
+                      volume:
+                        description: Your trading volume in the last 30 days measured in EUR.
+                        type: string
+                        example: '10000.00'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getAccount
+      x-operation-id-source: derived
+  /balance:
+    get:
+      tags:
+      - Account
+      summary: Get account balance
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns the current balance for your account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: symbol
+        in: query
+        required: false
+        description: 'The asset for which you want to return the balance. If not specified, returns the balance for all assets above zero.
+
+          '
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.balance({}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.balance({})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.Balance(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, balance := range response { fmt.Printf("%+v\n", balance) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    symbol:
+                      description: The asset for which the balance was returned.
+                      type: string
+                      example: BTC
+                    available:
+                      description: The balance that is available for use.
+                      type: string
+                      example: '1.57593193'
+                    inOrder:
+                      description: The balance that is currently reserved for open orders.
+                      type: string
+                      example: '0.74832374'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getBalance
+      x-operation-id-source: derived
+  /stakingBalance:
+    get:
+      tags:
+      - Account
+      summary: Get staking balance
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns the amount of crypto assets in your account that are currently in fixed staking positions and are not available for trading.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::tip
+
+        This request only returns assets locked in fixed staking. To get your balance available for trading, use the Get account balance request.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: symbol
+        in: query
+        required: false
+        description: 'The asset for which you want to return the staking balance. If not specified, returns the staking balance for all assets above zero.
+
+          '
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    symbol:
+                      description: The asset for which the balance was returned.
+                      type: string
+                      example: BTC
+                    amount:
+                      description: The amount that is currently locked in fixed staking.
+                      type: string
+                      example: '0.99994'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getStakingBalance
+      x-operation-id-source: derived
+  /account/fees:
+    get:
+      tags:
+      - Account
+      summary: Get market fees
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns your current trading fees from the Category of the specified market based on the trading volume of your account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - in: query
+        name: market
+        example: BTC-EUR
+        description: "The market for which to get fee information. If not specified, returns the fees for your \ncurrent tier in [Category A](https://bitvavo.com/en/fees).\n"
+        schema:
+          type: string
+      - in: query
+        name: quote
+        description: "The quote currency for which to get fee information. If not specified, returns the fees for your \ncurrent tier in [Category A](https://bitvavo.com/en/fees).\n"
+        schema:
+          type: string
+          enum:
+          - EUR
+          - USDC
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tier:
+                    description: 'The [price tier](https://bitvavo.com/en/fees) used to calculate your trading fees.
+
+                      > The first tier in the Bitvavo fee structure is **0**.
+
+                      '
+                    type: string
+                    example: '0'
+                  volume:
+                    description: Your trading volume over the last 30 days in EUR.
+                    type: string
+                    example: '10000.00'
+                  taker:
+                    description: The fee for trades that take liquidity from the order book.
+                    type: string
+                    example: '0.0025'
+                  maker:
+                    description: 'The fee for trades that add liquidity to the order book.
+
+                      '
+                    type: string
+                    example: '0.0015'
+        4XX:
+          description: To learn more, see [Handle errors](/docs/errors).
+      operationId: getAccountFees
+      x-operation-id-source: derived
+  /account/history:
+    get:
+      tags:
+      - Account
+      summary: Get transaction history
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns a list of past transactions for your account or the specified date range. If the range is not specified, returns all past transactions.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - name: fromDate
+        in: query
+        description: The Unix timestamp starting from which to return transactions.
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - name: toDate
+        in: query
+        description: The Unix timestamp up to which to return transactions.
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      - name: page
+        in: query
+        description: The page number for the transaction history.
+        schema:
+          type: integer
+          minimum: 1
+      - name: maxItems
+        in: query
+        description: The maximum number of items per page in the transaction history.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+      - name: type
+        in: query
+        description: The type of transaction to return.
+        schema:
+          type: string
+          enum:
+          - sell
+          - buy
+          - staking
+          - fixed_staking
+          - deposit
+          - withdrawal
+          - affiliate
+          - distribution
+          - internal_transfer
+          - withdrawal_cancelled
+          - rebate
+          - loan
+          - external_transferred_funds
+          - manually_assigned
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transactionId:
+                          description: The unique identifier of the transaction.
+                          type: string
+                          example: 5f5e7b3b-4f5b-4b2d-8b2f-4f2b5b3f5e5f
+                        executedAt:
+                          description: The Unix timestamp when the transaction was executed.
+                          type: string
+                          format: date-time
+                          example: '2021-01-01T00:00:00.000Z'
+                        type:
+                          description: The type of transaction.
+                          type: string
+                          enum:
+                          - sell
+                          - buy
+                          - staking
+                          - fixed_staking
+                          - deposit
+                          - withdrawal
+                          - affiliate
+                          - distribution
+                          - internal_transfer
+                          - withdrawal_cancelled
+                          - rebate
+                          - loan
+                          - external_transferred_funds
+                          - manually_assigned
+                          - manually_assigned_bitvavo
+                        priceCurrency:
+                          description: The currency in which the transaction was made.
+                          type: string
+                          example: EUR
+                        priceAmount:
+                          description: The amount of the transaction.
+                          type: string
+                          example: '1000.00'
+                        sentCurrency:
+                          description: The currency that was sent in the transaction.
+                          type: string
+                          example: EUR
+                        sentAmount:
+                          description: The amount that was sent in the transaction.
+                          type: string
+                          example: '0.1'
+                        receivedCurrency:
+                          description: The currency that was received in the transaction.
+                          type: string
+                          example: BTC
+                        receivedAmount:
+                          description: The amount that was received in the transaction.
+                          type: string
+                          example: '0.0001'
+                        feesCurrency:
+                          description: The currency in which the fees were paid.
+                          type: string
+                          example: EUR
+                        feesAmount:
+                          description: The amount of fees paid in the transaction.
+                          type: string
+                          example: '0.01'
+                        address:
+                          description: The address where the transaction was made.
+                          type:
+                          - string
+                          - 'null'
+                  currentPage:
+                    description: The current page number.
+                    type: integer
+                    example: 1
+                  totalPages:
+                    description: The total number of returned pages.
+                    type: integer
+                    example: 1
+                  maxItems:
+                    description: The maximum number of transactions per page.
+                    type: integer
+                    example: 100
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getAccountHistory
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

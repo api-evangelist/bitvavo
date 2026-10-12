@@ -1,0 +1,2678 @@
+openapi: 3.2.0
+info:
+  title: Bitvavo REST Trading API
+  version: 2.10.0
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Trading
+  description: Manage your orders and trades on Bitvavo.
+paths:
+  /order:
+    post:
+      tags:
+      - Trading
+      summary: Create order
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Creates an order to buy or sell digital assets on Bitvavo.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        You can have a maximum of 100 open orders at any one time in each `market`.
+
+        ::::
+
+
+        **Rate limit weight points**: **1**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - market
+              - side
+              - orderType
+              - operatorId
+              properties:
+                market:
+                  type: string
+                  example: BTC-EUR
+                  description: 'The market in which to create the order.
+
+                    '
+                side:
+                  type: string
+                  enum:
+                  - buy
+                  - sell
+                  description: 'Indicates whether the order is to buy or sell the asset.
+
+                    '
+                orderType:
+                  type: string
+                  enum:
+                  - market
+                  - limit
+                  - stopLoss
+                  - stopLossLimit
+                  - takeProfit
+                  - takeProfitLimit
+                  description: "The type of order to create. Possible values:\n\n- `market`: an order to buy or sell digital assets at the current market `price`. \n- `limit`: an order to buy or sell digital assets at the specified `price` or better.\n- `stopLoss`: a market order to buy or sell digital assets when the market price is worse or equal to your stop price. Worse means lower for sell orders and higher for buy orders.\n- `stopLossLimit`: a limit order to buy or sell digital assets at the specified `price` or better when the market price is worse or equal to your stop price. Worse means lower for sell orders and higher for buy orders.\n- `takeProfit`: a market order to buy or sell digital assets when the market price is better or equal to your stop price. Better means higher for sell orders and lower for buy orders.\n- `takeProfitLimit`: a limit order to buy or sell digital assets at the specified `price` or better when the market price is better or equal to your stop price. Better means higher for sell orders and lower for buy orders.\n\n<br/>\n\n> For limit orders, you need to set `amount` and `price`. For market orders, you need to set either `amount` or `amountQuote`.\n"
+                operatorId:
+                  description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                    '
+                  type: integer
+                  format: int64
+                  example: 543462
+                clientOrderId:
+                  type: string
+                  format: UUID
+                  description: 'Your identifier of the order. Must be unique across open orders.
+
+                    '
+                amount:
+                  type: string
+                  example: '1.567'
+                  description: 'The quantity of the base currency to buy or sell. To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `quantityDecimals` field.
+
+                    '
+                amountQuote:
+                  type: string
+                  example: '5000'
+                  description: 'The quantity of the quote currency to buy or sell for the `market`, `stopLoss`, or `takeProfit` order types. To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `notionalDecimals` field.
+
+                    '
+                price:
+                  type: string
+                  example: '6000'
+                  description: 'The price in quote currency for which you want to buy or sell 1 unit of the base currency.
+
+
+                    <br/>
+
+
+                    > Must be a multiple of the `tickSize` value for the market. To get the `tickSize`, make a [Get markets](/docs/rest-api/get-markets/) request.
+
+                    '
+                triggerAmount:
+                  type: string
+                  example: '4000'
+                  description: 'The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.
+
+                    '
+                triggerType:
+                  type: string
+                  enum:
+                  - price
+                  description: 'The type of trigger that fills the order when the condition is met.
+
+                    '
+                triggerReference:
+                  type: string
+                  enum:
+                  - lastTrade
+                  - bestBid
+                  - bestAsk
+                  - midPrice
+                  description: 'The price which triggers the order to be filled for `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+
+                    '
+                timeInForce:
+                  type: string
+                  enum:
+                  - GTC
+                  - IOC
+                  - FOK
+                  default: GTC
+                  description: 'How long an order stays active for.
+
+                    '
+                postOnly:
+                  type: boolean
+                  default: false
+                  description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                    '
+                selfTradePrevention:
+                  type: string
+                  enum:
+                  - cancelBoth
+                  - cancelNewest
+                  - cancelOldest
+                  - decrementAndCancel
+                  default: decrementAndCancel
+                  description: "**[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.\n\nIndicates how to prevent self-trading for conflicting orders of any type.\n\nPossible values:\n- `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order. \nFor example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.\n- `cancelOldest`: cancels the older conflicting order in the same market.\n- `cancelNewest`: cancels the later conflicting order in the same market.\n- `cancelBoth`: cancels both conflicting orders in the same market.\n"
+                disableMarketProtection:
+                  type: boolean
+                  default: false
+                  deprecated: true
+                  description: 'Must be **false** because market protection can no longer be disabled.
+
+                    '
+                responseRequired:
+                  type: boolean
+                  default: true
+                  description: 'Indicates whether the response returns all parameters (**true**) or only the HTTP status code (**false**).
+
+                    '
+                codGroupId:
+                  type: integer
+                  example: 1
+                  minimum: 1
+                  maximum: 1000
+                  description: 'Your identifier for a group of orders.
+
+                    '
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.placeOrder('BTC-EUR', 'sell', 'limit', {\n  amount: '0.1',\n  price: '5000',\n  operatorId: 543462\n}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.placeOrder('BTC-EUR', 'sell', 'limit', { 'amount': '0.1', 'price': '5000', 'operatorId': 543462 })\nprint(response)\n"
+      - lang: Go
+        source: "import . \"bitvavo\"\nbitvavo := Bitvavo{ApiKey:\"<APIKEY>\", ApiSecret:\"<APISECRET>\"}\n\nresponse, err := bitvavo.PlaceOrder(\"BTC-EUR\", \"sell\", \"limit\", map[string]string{\n    \"price\": \"5000\",\n    \"operatorId\": \"543462\",\n})\nif err != nil {\n    fmt.Println(err)\n} else {\n    fmt.Printf(\"%+v\\n\", response)\n}"
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: responseRequired=true
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                        '
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    clientOrderId:
+                      description: 'Your identifier of the order. Only returned if specified in the request.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    market:
+                      type: string
+                      example: BTC-EUR
+                      description: 'The market where you created an order.
+
+                        '
+                    created:
+                      description: 'The Unix timestamp when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    updated:
+                      description: 'The Unix timestamp when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    status:
+                      description: "The status of an order. Possible values:\n- `new`: the `orderId` has been added to the order book and has not been filled.\n- `awaitingTrigger`: the conditions to fill an order haven't been met. \n- `canceled`: the `orderId` has been removed from the order book. \n- `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.\n- `filled`: all trades necessary to complete the order have been filled. \n- `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.  \n"
+                      type: string
+                      enum:
+                      - new
+                      - awaitingTrigger
+                      - canceled
+                      - expired
+                      - filled
+                      - partiallyFilled
+                    side:
+                      description: 'Indicates whether the order is to buy or sell the asset.
+
+                        '
+                      type: string
+                      enum:
+                      - buy
+                      - sell
+                    orderType:
+                      description: 'The type of order you created.
+
+                        '
+                      type: string
+                      enum:
+                      - limit
+                      - market
+                    amount:
+                      description: 'The quantity of the base currency to buy or sell.
+
+                        If you set `amountQuote` in your order, `amount` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    amountRemaining:
+                      description: 'The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+
+                        If you set `amountQuote` in your order, `amountRemaining` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    price:
+                      description: 'The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+
+                        For other types of orders, the `price` is not returned.
+
+                        '
+                      type: string
+                      example: '7000'
+                    amountQuote:
+                      description: "The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. \nIf you set `amount` in your order, `amountQuote` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    amountQuoteRemaining:
+                      description: "The quantity of the quote currency remaining after the sum of all fills is \nsubtracted from `amountQuote`.\n\nIf you set `amount` in the order, `amountQuoteRemaining` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    onHold:
+                      description: 'The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+
+                        All funds are released when order is filled.
+
+                        '
+                      type: string
+                      example: '70000'
+                    onHoldCurrency:
+                      description: 'The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+
+                        '
+                      type: string
+                      example: EUR
+                    triggerPrice:
+                      description: "The price calculated using `triggerAmount` and \n`triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` \ntypes of orders.   \n\nFor example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` \nwhen the `triggerReference` price in quote currency reaches 4000.\n"
+                      type: string
+                      example: '4000'
+                    triggerAmount:
+                      description: "The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  \nThis value and `triggerType` are used to calculate `triggerPrice`.\n"
+                      type: string
+                      example: '4000'
+                    triggerType:
+                      description: 'The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+
+                        '
+                      type: string
+                      enum:
+                      - price
+                    triggerReference:
+                      description: 'The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+
+                        '
+                      type: string
+                      enum:
+                      - lastTrade
+                      - bestBid
+                      - bestAsk
+                      - midPrice
+                    filledAmount:
+                      description: The total amount bought or sold in base currency.
+                      type: string
+                      example: '0'
+                    filledAmountQuote:
+                      description: The total amount bought or sold in quote currency.
+                      type: string
+                      example: '0'
+                    feePaid:
+                      description: 'The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+
+                        GET [/account/fees](/docs/rest-api/get-market-fees).
+
+                        '
+                      type: string
+                      example: '0'
+                    feeCurrency:
+                      description: The currency of the `feePaid`.
+                      type: string
+                      example: EUR
+                    fills:
+                      description: 'The fill generated by the update order request.
+
+                        '
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            description: The identifier of this fill.
+                            type: string
+                            example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                          timestamp:
+                            description: 'A Unix timestamp when Bitvavo processed the fill.
+
+                              '
+                            type: integer
+                            format: unix-timestamp in milliseconds
+                            example: 1542967486256
+                          amount:
+                            description: The amount of base currency exchanged in the fill.
+                            type: string
+                            example: '0.005'
+                          price:
+                            description: The price of the fill in quote currency.
+                            type: string
+                            example: '5000.1'
+                          taker:
+                            description: Returns `true` when you are the taker for the fill.
+                            type: boolean
+                            example: true
+                          fee:
+                            description: "The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see \nGET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.\n \nIf `settled` is `false`, this parameter is not included in the return parameters.\n"
+                            type: string
+                            example: '0.03'
+                          feeCurrency:
+                            description: 'The currency that the `fee` is paid in.
+
+
+                              If `settled` is `false`, this object is not returned.
+
+                              '
+                            type: string
+                            example: EUR
+                          settled:
+                            description: "On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet \npaid, `settled` is `false`.\n"
+                            type: boolean
+                    selfTradePrevention:
+                      description: 'Indicates how to prevent self-trading for conflicting orders of any type.
+
+                        '
+                      type: string
+                      enum:
+                      - decrementAndCancel
+                      - cancelOldest
+                      - cancelNewest
+                      - cancelBoth
+                    visible:
+                      description: 'Returns `true` when the `orderId` is visible in the [order book](/docs/rest-api/get-order-book) for a `market`.
+
+                        '
+                      type: boolean
+                    timeInForce:
+                      description: 'The value you set for how long an order stays active.
+
+                        '
+                      type: string
+                      enum:
+                      - GTC
+                      - IOC
+                      - FOK
+                    postOnly:
+                      description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                        '
+                      type: boolean
+                    disableMarketProtection:
+                      description: 'Must be **false** because market protection can no longer be disabled.
+
+                        '
+                      type: boolean
+                      deprecated: true
+                    operatorId:
+                      description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                        '
+                      type: integer
+                      format: int64
+                      example: 543462
+                    restatementReason:
+                      description: 'Specifies the reason why the status of the order was changed. For example when an order is canceled by the [Price protection checks](/docs/order-lifecycle/#price-protection).
+
+                        '
+                      type: string
+                      enum:
+                      - decrementOnSelfTradePrevention
+                      - cancelOnSelfTradePrevention
+                      - cancelOnPlacementPriceProtection
+                      - cancelOnExecutionPriceProtection
+                      - cancelOnSpreadProtection
+                      - cancelOnReferencePriceProtection
+                      - cancelPostOnlyOnAuctionMatching
+                      - cancelOnMaintenance
+                      - cancelOnDisconnect
+                      - cancelOnDelisting
+                      - cancelOnLockPlaced
+                      - cancelOnAdminRequest
+                      - cancelPostOnly
+                    createdNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    updatedNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    codGroupId:
+                      type: integer
+                      example: 1
+                      description: 'Your identifier for a group of orders.
+
+                        '
+                - title: responseRequired=false
+                  type: object
+                  properties:
+                    market:
+                      type: string
+                      example: BTC-EUR
+                      description: 'The market where you created an order.
+
+                        '
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                        '
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    clientOrderId:
+                      description: 'Your identifier of the order. Only returned if specified in the request.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    created:
+                      description: 'The Unix timestamp when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    updated:
+                      description: 'The Unix timestamp when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    createdNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    updatedNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postOrder
+      x-operation-id-source: derived
+    put:
+      tags:
+      - Trading
+      summary: Update order
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Updates an existing *limit* or *trigger* order.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::info
+
+        You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+
+        :::
+
+
+        :::tip
+
+        Updating an order is faster than canceling and creating new orders. During the update, your order is briefly removed from the order book.
+
+        :::
+
+
+        **Rate limit weight points**: 1.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - market
+              - operatorId
+              properties:
+                market:
+                  description: The market in which to update an order.
+                  type: string
+                  example: BTC-EUR
+                orderId:
+                  description: 'Bitvavo identifier of the order to update.
+
+                    '
+                  type: string
+                  format: UUID
+                  example: 95d92d6c-ecf0-4960-a608-9953ef71652e
+                operatorId:
+                  description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                    '
+                  type: integer
+                  format: int64
+                  example: 543462
+                clientOrderId:
+                  description: 'Your identifier of the order to update. Must be unique among open orders.
+
+
+                    <br/>
+
+
+                    > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+
+                    '
+                  type: string
+                  format: UUID
+                  example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                amount:
+                  description: "The amount of base currency to update. Specifying the `amount` automatically adjusts the `amountRemaining`. \n\n<br/>\n\nTo get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `quantityDecimals` field.\n"
+                  type: string
+                  example: '1.567'
+                amountQuote:
+                  description: "**Only for `takeProfit` and `stopLoss` orders that are not triggered yet**. The amount of quote currency to buy or sell at the best available price. \n\n<br/>\n\n> To get the number of allowed decimals, make a [Get markets](/docs/rest-api/get-markets/) request and check the `notionalDecimals` field.\n"
+                  type: string
+                  example: '5000'
+                amountRemaining:
+                  description: 'The remaining amount of base currency to update. Specifying the `amountRemaining` automatically adjusts the `amount`.
+
+
+                    <br/>
+
+
+                    > We discourage updating the `amountRemaining` because you can end up buying or selling more than you intended.
+
+                    '
+                  type: string
+                  example: '1.560'
+                price:
+                  description: 'The amount of quote currency for 1 unit of the base currency.
+
+
+                    <br/>
+
+
+                    > Must be a multiple of the `tickSize` value for the market. To get the `tickSize`, make a [Get markets](/docs/rest-api/get-markets/) request.
+
+                    '
+                  type: string
+                  example: '6000'
+                triggerAmount:
+                  description: '**Only for stop orders**. The price at which you want to buy or sell 1 unit of the base currency in the quote currency.
+
+
+                    <br/>
+
+
+                    > You can only update orders that have not been triggered yet.
+
+                    '
+                  type: string
+                  example: '4000'
+                timeInForce:
+                  description: "How long an `orderType` stays active for. Possible values:\n\n- `FOK`: *Fill-Or-Kill*. Fills the entire order from existing orders, or cancels the entire order.\n- `GTC`: *Good-Til-Canceled*. Stays in the order book until the entire order is filled or you manually cancel it. \n- `IOC`: *Immediate-Or-Cancel*. Fills existing orders and cancels the unfilled balance.\n\n<br/>\n\n> You can only update orders that have not been triggered yet.\n"
+                  type: string
+                  enum:
+                  - GTC
+                  - IOC
+                  - FOK
+                selfTradePrevention:
+                  description: "**[Self-trading is not allowed on Bitvavo](https://bitvavo.com/en/trading-rules)**.\n\nIndicates how to prevent self-trading for conflicting orders of any type.\n\nPossible values:\n- `decrementAndCancel`: (default) decreases the amount in the conflicting order by the difference between the buy and sell orders in the same market. Cancels the lower order. \nFor example, if a sell order is for 500 BTC and a buy order is for 300 BTC, it cancels the buy order and adjusts the sell order to 200 BTC.\n- `cancelOldest`: cancels the older conflicting order in the same market.\n- `cancelNewest`: cancels the later conflicting order in the same market.\n- `cancelBoth`: cancels both conflicting orders in the same market.\n"
+                  type: string
+                  enum:
+                  - decrementAndCancel
+                  - cancelOldest
+                  - cancelNewest
+                  - cancelBoth
+                postOnly:
+                  description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                    '
+                  type: boolean
+                responseRequired:
+                  description: 'Indicates whether the response returns all parameters (**true**) or only the HTTP status code (**false**).
+
+                    '
+                  type: boolean
+                  default: true
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.updateOrder('BTC-EUR', 'b0d39267-f628-43ed-8ab7-1df502d80a7a', { 'amount': '0.2', 'operatorId': 543462 }, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.updateOrder('BTC-EUR', 'a4a5d310-687c-486e-a3eb-1df832405ccd', { 'amount': '1.1', 'operatorId': 543462 })\nprint(response)\n"
+      - lang: Go
+        source: "import . \"bitvavo\"\nbitvavo := Bitvavo{ApiKey:\"<APIKEY>\", ApiSecret:\"<APISECRET>\"}\n\nresponse, err := bitvavo.UpdateOrder(\"BTC-EUR\", \"58496625-6764-4765-bec9-cfc6cb80238e\", map[string]string{\n    \"price\": \"5000\",\n    \"operatorId\": \"543462\",\n})\nif err != nil {\n  fmt.Println(err)\n} else {\n  fmt.Printf(\"%+v\\n\", response)\n}\n"
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: responseRequired=true
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                        '
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    clientOrderId:
+                      description: 'Your identifier of the order. Only returned if specified in the request.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    market:
+                      type: string
+                      example: BTC-EUR
+                      description: 'The market where you created an order.
+
+                        '
+                    created:
+                      description: 'The Unix timestamp when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    updated:
+                      description: 'The Unix timestamp when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    status:
+                      description: "The status of an order. Possible values:\n- `new`: the `orderId` has been added to the order book and has not been filled.\n- `awaitingTrigger`: the conditions to fill an order haven't been met. \n- `canceled`: the `orderId` has been removed from the order book. \n- `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.\n- `filled`: all trades necessary to complete the order have been filled. \n- `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.  \n"
+                      type: string
+                      enum:
+                      - new
+                      - awaitingTrigger
+                      - canceled
+                      - expired
+                      - filled
+                      - partiallyFilled
+                    side:
+                      description: 'Indicates whether the order is to buy or sell the asset.
+
+                        '
+                      type: string
+                      enum:
+                      - buy
+                      - sell
+                    orderType:
+                      description: 'The type of order you created.
+
+                        '
+                      type: string
+                      enum:
+                      - limit
+                      - market
+                    amount:
+                      description: 'The quantity of the base currency to buy or sell.
+
+                        If you set `amountQuote` in your order, `amount` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    amountRemaining:
+                      description: 'The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+
+                        If you set `amountQuote` in your order, `amountRemaining` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    price:
+                      description: 'The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+
+                        For other types of orders, the `price` is not returned.
+
+                        '
+                      type: string
+                      example: '7000'
+                    amountQuote:
+                      description: "The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. \nIf you set `amount` in your order, `amountQuote` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    amountQuoteRemaining:
+                      description: "The quantity of the quote currency remaining after the sum of all fills is \nsubtracted from `amountQuote`.\n\nIf you set `amount` in the order, `amountQuoteRemaining` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    onHold:
+                      description: 'The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+
+                        All funds are released when order is filled.
+
+                        '
+                      type: string
+                      example: '70000'
+                    onHoldCurrency:
+                      description: 'The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+
+                        '
+                      type: string
+                      example: EUR
+                    triggerPrice:
+                      description: "The price calculated using `triggerAmount` and \n`triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` \ntypes of orders.   \n\nFor example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` \nwhen the `triggerReference` price in quote currency reaches 4000.\n"
+                      type: string
+                      example: '4000'
+                    triggerAmount:
+                      description: "The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  \nThis value and `triggerType` are used to calculate `triggerPrice`.\n"
+                      type: string
+                      example: '4000'
+                    triggerType:
+                      description: 'The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+
+                        '
+                      type: string
+                      enum:
+                      - price
+                    triggerReference:
+                      description: 'The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+
+                        '
+                      type: string
+                      enum:
+                      - lastTrade
+                      - bestBid
+                      - bestAsk
+                      - midPrice
+                    filledAmount:
+                      description: The total amount bought or sold in base currency.
+                      type: string
+                      example: '0'
+                    filledAmountQuote:
+                      description: The total amount bought or sold in quote currency.
+                      type: string
+                      example: '0'
+                    feePaid:
+                      description: 'The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+
+                        GET [/account/fees](/docs/rest-api/get-market-fees).
+
+                        '
+                      type: string
+                      example: '0'
+                    feeCurrency:
+                      description: The currency of the `feePaid`.
+                      type: string
+                      example: EUR
+                    fills:
+                      description: 'The fill generated by the update order request.
+
+                        '
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            description: The identifier of this fill.
+                            type: string
+                            example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                          timestamp:
+                            description: 'A Unix timestamp when Bitvavo processed the fill.
+
+                              '
+                            type: integer
+                            format: unix-timestamp in milliseconds
+                            example: 1542967486256
+                          amount:
+                            description: The amount of base currency exchanged in the fill.
+                            type: string
+                            example: '0.005'
+                          price:
+                            description: The price of the fill in quote currency.
+                            type: string
+                            example: '5000.1'
+                          taker:
+                            description: Returns `true` when you are the taker for the fill.
+                            type: boolean
+                            example: true
+                          fee:
+                            description: "The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see \nGET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.\n \nIf `settled` is `false`, this parameter is not included in the return parameters.\n"
+                            type: string
+                            example: '0.03'
+                          feeCurrency:
+                            description: 'The currency that the `fee` is paid in.
+
+
+                              If `settled` is `false`, this object is not returned.
+
+                              '
+                            type: string
+                            example: EUR
+                          settled:
+                            description: "On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet \npaid, `settled` is `false`.\n"
+                            type: boolean
+                    selfTradePrevention:
+                      description: 'Indicates how to prevent self-trading for conflicting orders of any type.
+
+                        '
+                      type: string
+                      enum:
+                      - decrementAndCancel
+                      - cancelOldest
+                      - cancelNewest
+                      - cancelBoth
+                    visible:
+                      description: 'Returns `true` when the `orderId` is visible in the [order book](/docs/rest-api/get-order-book) for a `market`.
+
+                        '
+                      type: boolean
+                    timeInForce:
+                      description: 'The value you set for how long an order stays active.
+
+                        '
+                      type: string
+                      enum:
+                      - GTC
+                      - IOC
+                      - FOK
+                    postOnly:
+                      description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                        '
+                      type: boolean
+                    disableMarketProtection:
+                      description: 'Must be **false** because market protection can no longer be disabled.
+
+                        '
+                      type: boolean
+                      deprecated: true
+                    operatorId:
+                      description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                        '
+                      type: integer
+                      format: int64
+                      example: 543462
+                    restatementReason:
+                      description: 'Specifies the reason why the status of the order was changed. For example when an order is canceled by the [Price protection checks](/docs/order-lifecycle/#price-protection).
+
+                        '
+                      type: string
+                      enum:
+                      - decrementOnSelfTradePrevention
+                      - cancelOnSelfTradePrevention
+                      - cancelOnPlacementPriceProtection
+                      - cancelOnExecutionPriceProtection
+                      - cancelOnSpreadProtection
+                      - cancelOnReferencePriceProtection
+                      - cancelPostOnlyOnAuctionMatching
+                      - cancelOnMaintenance
+                      - cancelOnDisconnect
+                      - cancelOnDelisting
+                      - cancelOnLockPlaced
+                      - cancelOnAdminRequest
+                      - cancelPostOnly
+                    createdNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    updatedNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    codGroupId:
+                      type: integer
+                      example: 1
+                      description: 'Your identifier for a group of orders.
+
+                        '
+                - title: responseRequired=false
+                  type: object
+                  properties:
+                    market:
+                      type: string
+                      example: BTC-EUR
+                      description: 'The market where you created an order.
+
+                        '
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                        '
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    clientOrderId:
+                      description: 'Your identifier of the order. Only returned if specified in the request.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    created:
+                      description: 'The Unix timestamp when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    updated:
+                      description: 'The Unix timestamp when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    createdNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    updatedNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: putOrder
+      x-operation-id-source: derived
+    get:
+      tags:
+      - Trading
+      summary: Get order
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns information about an existing order.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::info
+
+        You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - name: market
+        in: query
+        required: true
+        schema:
+          type: string
+        example: BTC-EUR
+        description: 'The market in which order was made.
+
+          '
+      - name: orderId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: UUID
+        example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+        description: 'Bitvavo identifier of the order.
+
+          '
+      - name: clientOrderId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: UUID
+        example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+        description: 'Your identifier of the order.
+
+
+          <br/>
+
+
+          > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+
+          '
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\nbitvavo.getOrder('BTC-EUR', 'a8d260d8-9228-4bcb-979a-01aeaab4e961', (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.getOrder('XRP-BTC', 'a4a5d310-687c-486e-a3eb-1df832405ccd')\nprint(response)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.GetOrder("BTC-EUR", "0d4ab620-a4a5-43d5-a62c-fe3daf46b913") if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    format: UUID
+                    description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                      '
+                    example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                  clientOrderId:
+                    description: 'Your identifier of the order. Only returned if specified in the request.
+
+                      '
+                    type: string
+                    format: UUID
+                    example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                  market:
+                    type: string
+                    example: BTC-EUR
+                    description: 'The market where you created an order.
+
+                      '
+                  created:
+                    description: 'The Unix timestamp when the order was created.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1706100650751
+                  updated:
+                    description: 'The Unix timestamp when the order was last updated.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1706100650751
+                  status:
+                    description: "The status of an order. Possible values:\n- `new`: the `orderId` has been added to the order book and has not been filled.\n- `awaitingTrigger`: the conditions to fill an order haven't been met. \n- `canceled`: the `orderId` has been removed from the order book. \n- `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.\n- `filled`: all trades necessary to complete the order have been filled. \n- `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.  \n"
+                    type: string
+                    enum:
+                    - new
+                    - awaitingTrigger
+                    - canceled
+                    - expired
+                    - filled
+                    - partiallyFilled
+                  side:
+                    description: 'Indicates whether the order is to buy or sell the asset.
+
+                      '
+                    type: string
+                    enum:
+                    - buy
+                    - sell
+                  orderType:
+                    description: 'The type of order you created.
+
+                      '
+                    type: string
+                    enum:
+                    - limit
+                    - market
+                  amount:
+                    description: 'The quantity of the base currency to buy or sell.
+
+                      If you set `amountQuote` in your order, `amount` is not returned.
+
+                      '
+                    type: string
+                    example: '10'
+                  amountRemaining:
+                    description: 'The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+
+                      If you set `amountQuote` in your order, `amountRemaining` is not returned.
+
+                      '
+                    type: string
+                    example: '10'
+                  price:
+                    description: 'The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+
+                      For other types of orders, the `price` is not returned.
+
+                      '
+                    type: string
+                    example: '7000'
+                  amountQuote:
+                    description: "The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. \nIf you set `amount` in your order, `amountQuote` is not returned.\n"
+                    type: string
+                    example: '5000'
+                  amountQuoteRemaining:
+                    description: "The quantity of the quote currency remaining after the sum of all fills is \nsubtracted from `amountQuote`.\n\nIf you set `amount` in the order, `amountQuoteRemaining` is not returned.\n"
+                    type: string
+                    example: '5000'
+                  onHold:
+                    description: 'The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+
+                      All funds are released when order is filled.
+
+                      '
+                    type: string
+                    example: '70000'
+                  onHoldCurrency:
+                    description: 'The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+
+                      '
+                    type: string
+                    example: EUR
+                  triggerPrice:
+                    description: "The price calculated using `triggerAmount` and \n`triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` \ntypes of orders.   \n\nFor example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` \nwhen the `triggerReference` price in quote currency reaches 4000.\n"
+                    type: string
+                    example: '4000'
+                  triggerAmount:
+                    description: "The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  \nThis value and `triggerType` are used to calculate `triggerPrice`.\n"
+                    type: string
+                    example: '4000'
+                  triggerType:
+                    description: 'The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+
+                      '
+                    type: string
+                    enum:
+                    - price
+                  triggerReference:
+                    description: 'The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+
+                      '
+                    type: string
+                    enum:
+                    - lastTrade
+                    - bestBid
+                    - bestAsk
+                    - midPrice
+                  filledAmount:
+                    description: The total amount bought or sold in base currency.
+                    type: string
+                    example: '0'
+                  filledAmountQuote:
+                    description: The total amount bought or sold in quote currency.
+                    type: string
+                    example: '0'
+                  feePaid:
+                    description: 'The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+
+                      GET [/account/fees](/docs/rest-api/get-market-fees).
+
+                      '
+                    type: string
+                    example: '0'
+                  feeCurrency:
+                    description: The currency of the `feePaid`.
+                    type: string
+                    example: EUR
+                  fills:
+                    description: 'A JSON object containing all fills for `orderId`.
+
+                      '
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The identifier of this fill.
+                          type: string
+                          example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                        timestamp:
+                          description: 'A Unix timestamp when Bitvavo processed the fill.
+
+                            '
+                          type: integer
+                          format: unix-timestamp in milliseconds
+                          example: 1542967486256
+                        amount:
+                          description: The amount of base currency exchanged in the fill.
+                          type: string
+                          example: '0.005'
+                        price:
+                          description: The price of the fill in quote currency.
+                          type: string
+                          example: '5000.1'
+                        taker:
+                          description: Returns `true` when you are the taker for the fill.
+                          type: boolean
+                          example: true
+                        fee:
+                          description: "The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see \nGET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.\n\nIf `settled` is `false`, this parameter is not included in the return parameters.\n"
+                          type: string
+                          example: '0.03'
+                        feeCurrency:
+                          description: 'The currency that the `fee` is paid in.
+
+
+                            If `settled` is `false`, this object is not returned.
+
+                            '
+                          type: string
+                          example: EUR
+                        settled:
+                          description: "On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet \npaid, `settled` is `false`.\n"
+                          type: boolean
+                  selfTradePrevention:
+                    description: 'Indicates how to prevent self-trading for conflicting orders of any type.
+
+                      '
+                    type: string
+                    enum:
+                    - decrementAndCancel
+                    - cancelOldest
+                    - cancelNewest
+                    - cancelBoth
+                  visible:
+                    description: 'Returns `true` when the `orderId` is visible in the [order book](/docs/rest-api/get-order-book) for a `market`.
+
+                      '
+                    type: boolean
+                  timeInForce:
+                    description: 'The value you set for how long an order stays active.
+
+                      '
+                    type: string
+                    enum:
+                    - GTC
+                    - IOC
+                    - FOK
+                  postOnly:
+                    description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                      '
+                    type: boolean
+                  disableMarketProtection:
+                    description: 'Must be **false** because market protection can no longer be disabled.
+
+                      '
+                    type: boolean
+                    deprecated: true
+                  createdNs:
+                    description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+                  updatedNs:
+                    description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getOrder
+      x-operation-id-source: derived
+    delete:
+      tags:
+      - Trading
+      summary: Cancel order
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Cancels an open order.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::info
+
+        You must set either `orderId` or `clientOrderId`. If you set both, we use the `clientOrderId` to identify the order. `clientOrderId` is only returned if you set it when you created the order.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - name: market
+        in: query
+        required: true
+        schema:
+          type: string
+        example: BTC-EUR
+        description: 'The market in which order was made.
+
+          '
+      - name: orderId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: UUID
+        example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+        description: 'Bitvavo identifier of the order.
+
+          '
+      - name: operatorId
+        in: query
+        required: true
+        description: 'Your identifier for the trader or the bot within your account that made the request.
+
+          '
+        schema:
+          type: integer
+          format: int64
+          example: 543462
+      - name: clientOrderId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: UUID
+        example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+        description: 'Your identifier of the order.
+
+
+          <br/>
+
+
+          > If both `clientOrderId` and `orderId` are set, we use the `clientOrderId` to identify the order.
+
+          '
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.cancelOrder(\n    'BTC-EUR',\n    'c8719781-7251-4fd7-9673-cce170e4f33a',\n    { operatorId: 543462 },\n    (error, response) => {\n      if (error === null) {\n        console.log('We canceled order ', response)\n      } else {\n        console.log(error)\n      }\n    }\n)\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.cancelOrder('BTC-EUR', 'a4a5d310-687c-486e-a3eb-1df832405ccd', { 'operatorId': 543462 })\nprint('Deleted', response['orderId'])\n"
+      - lang: Go
+        source: "import . \"bitvavo\"\nbitvavo := Bitvavo{ApiKey:\"<APIKEY>\", ApiSecret:\"<APISECRET>\"}\n\nresponse, err := bitvavo.CancelOrder(\"BTC-EUR\", \"0b01bf57-2b86-4482-ac70-20b3d257793b\", map[string]string{\n    \"operatorId\": \"543462\",\n})\nif err != nil {\n  fmt.Println(err)\n} else {\n  fmt.Printf(\"%+v\\n\", response)\n}\n"
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    description: Bitvavo identifier of the order.
+                    type: string
+                    format: UUID
+                    example: 2e7ce7fc-44e2-4d80-a4a7-d079c4750b61
+                  clientOrderId:
+                    description: 'Your identifier of the cancelled order. Only returned if specified in the request.
+
+                      '
+                    type: string
+                    format: UUID
+                    example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                  operatorId:
+                    description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                      '
+                    type: integer
+                    format: int64
+                    example: 543462
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: deleteOrder
+      x-operation-id-source: derived
+  /ordersOpen:
+    get:
+      tags:
+      - Trading
+      summary: Get open orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns all current open orders.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **100** (without `market`) or **5** (with `market`).'
+      parameters:
+      - name: market
+        in: query
+        description: "The market in which to return the open orders. \nIf not specified, all open orders are returned.\n"
+        required: false
+        schema:
+          type: string
+      - name: base
+        in: query
+        description: "The base asset for which to return the open orders. \nIf neither `market` nor `base` are specified, all open orders are returned.\n"
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.ordersOpen({}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.ordersOpen({})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.OrdersOpen(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, order := range response { fmt.Printf("%+v\n", order) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    format: UUID
+                    description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                      '
+                    example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                  clientOrderId:
+                    description: 'Your identifier of the order. Only returned if specified in the request.
+
+                      '
+                    type: string
+                    format: UUID
+                    example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                  market:
+                    type: string
+                    example: BTC-EUR
+                    description: 'The market where you created an order.
+
+                      '
+                  created:
+                    description: 'The Unix timestamp when the order was created.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1706100650751
+                  updated:
+                    description: 'The Unix timestamp when the order was last updated.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1706100650751
+                  status:
+                    description: "The status of an order. Possible values:\n- `new`: the `orderId` has been added to the order book and has not been filled.\n- `awaitingTrigger`: the conditions to fill an order haven't been met. \n- `canceled`: the `orderId` has been removed from the order book. \n- `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.\n- `filled`: all trades necessary to complete the order have been filled. \n- `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.  \n"
+                    type: string
+                    enum:
+                    - new
+                    - awaitingTrigger
+                    - canceled
+                    - expired
+                    - filled
+                    - partiallyFilled
+                  side:
+                    description: 'Indicates whether the order is to buy or sell the asset.
+
+                      '
+                    type: string
+                    enum:
+                    - buy
+                    - sell
+                  orderType:
+                    description: 'The type of order you created.
+
+                      '
+                    type: string
+                    enum:
+                    - limit
+                    - market
+                  amount:
+                    description: 'The quantity of the base currency to buy or sell.
+
+                      If you set `amountQuote` in your order, `amount` is not returned.
+
+                      '
+                    type: string
+                    example: '10'
+                  amountRemaining:
+                    description: 'The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+
+                      If you set `amountQuote` in your order, `amountRemaining` is not returned.
+
+                      '
+                    type: string
+                    example: '10'
+                  price:
+                    description: 'The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+
+                      For other types of orders, the `price` is not returned.
+
+                      '
+                    type: string
+                    example: '7000'
+                  amountQuote:
+                    description: "The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. \nIf you set `amount` in your order, `amountQuote` is not returned.\n"
+                    type: string
+                    example: '5000'
+                  amountQuoteRemaining:
+                    description: "The quantity of the quote currency remaining after the sum of all fills is \nsubtracted from `amountQuote`.\n\nIf you set `amount` in the order, `amountQuoteRemaining` is not returned.\n"
+                    type: string
+                    example: '5000'
+                  onHold:
+                    description: 'The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+
+                      All funds are released when order is filled.
+
+                      '
+                    type: string
+                    example: '70000'
+                  onHoldCurrency:
+                    description: 'The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+
+                      '
+                    type: string
+                    example: EUR
+                  triggerPrice:
+                    description: "The price calculated using `triggerAmount` and \n`triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` \ntypes of orders.   \n\nFor example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` \nwhen the `triggerReference` price in quote currency reaches 4000.\n"
+                    type: string
+                    example: '4000'
+                  triggerAmount:
+                    description: "The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  \nThis value and `triggerType` are used to calculate `triggerPrice`.\n"
+                    type: string
+                    example: '4000'
+                  triggerType:
+                    description: 'The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+
+                      '
+                    type: string
+                    enum:
+                    - price
+                  triggerReference:
+                    description: 'The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+
+                      '
+                    type: string
+                    enum:
+                    - lastTrade
+                    - bestBid
+                    - bestAsk
+                    - midPrice
+                  filledAmount:
+                    description: The total amount bought or sold in base currency.
+                    type: string
+                    example: '0'
+                  filledAmountQuote:
+                    description: The total amount bought or sold in quote currency.
+                    type: string
+                    example: '0'
+                  feePaid:
+                    description: 'The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+
+                      GET [/account/fees](/docs/rest-api/get-market-fees).
+
+                      '
+                    type: string
+                    example: '0'
+                  feeCurrency:
+                    description: The currency of the `feePaid`.
+                    type: string
+                    example: EUR
+                  fills:
+                    description: 'A JSON object containing all fills for `orderId`.
+
+                      '
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The identifier of this fill.
+                          type: string
+                          example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                        timestamp:
+                          description: 'A Unix timestamp when Bitvavo processed the fill.
+
+                            '
+                          type: integer
+                          format: unix-timestamp in milliseconds
+                          example: 1542967486256
+                        amount:
+                          description: The amount of base currency exchanged in the fill.
+                          type: string
+                          example: '0.005'
+                        price:
+                          description: The price of the fill in quote currency.
+                          type: string
+                          example: '5000.1'
+                        taker:
+                          description: Returns `true` when you are the taker for the fill.
+                          type: boolean
+                          example: true
+                        fee:
+                          description: "The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see \nGET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.\n\nIf `settled` is `false`, this parameter is not included in the return parameters.\n"
+                          type: string
+                          example: '0.03'
+                        feeCurrency:
+                          description: 'The currency that the `fee` is paid in.
+
+
+                            If `settled` is `false`, this object is not returned.
+
+                            '
+                          type: string
+                          example: EUR
+                        settled:
+                          description: "On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet \npaid, `settled` is `false`.\n"
+                          type: boolean
+                  selfTradePrevention:
+                    description: 'Indicates how to prevent self-trading for conflicting orders of any type.
+
+                      '
+                    type: string
+                    enum:
+                    - decrementAndCancel
+                    - cancelOldest
+                    - cancelNewest
+                    - cancelBoth
+                  visible:
+                    description: 'Returns `true` when the `orderId` is visible in the [order book](/docs/rest-api/get-order-book) for a `market`.
+
+                      '
+                    type: boolean
+                  timeInForce:
+                    description: 'The value you set for how long an order stays active.
+
+                      '
+                    type: string
+                    enum:
+                    - GTC
+                    - IOC
+                    - FOK
+                  postOnly:
+                    description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                      '
+                    type: boolean
+                  disableMarketProtection:
+                    description: 'Must be **false** because market protection can no longer be disabled.
+
+                      '
+                    type: boolean
+                    deprecated: true
+                  operatorId:
+                    description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                      '
+                    type: integer
+                    format: int64
+                    example: 543462
+                  createdNs:
+                    description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+                  updatedNs:
+                    description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+                  codGroupId:
+                    type: integer
+                    example: 1
+                    description: 'Your identifier for a [group of orders](/docs/websocket-api/cancel-orders-after/).
+
+                      '
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getOrdersOpen
+      x-operation-id-source: derived
+  /trades:
+    get:
+      tags:
+      - Trading
+      summary: Get trade history
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns the specified number of past trades for your account and a time period of up to 24 hours. Does not return trades with a Price Guarantee.
+
+
+        The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::tip
+
+        To get a specific list of trades, use the `start`, `end`, `tradeIdFrom`, and `tradeIdTo` parameters.
+
+        ::::
+
+
+        :::tip
+
+        To get all past transactions for your account, use the Get transaction history request.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: market
+        in: query
+        description: 'The market for which to return the past trades.
+
+          '
+        example: BTC-EUR
+        required: true
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: 'The maximum number of trades to return, from latest to earliest.
+
+          '
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - name: start
+        required: false
+        in: query
+        description: 'The Unix timestamp starting from which to return trades.
+
+          <br/>
+
+          > Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - name: end
+        required: false
+        in: query
+        description: 'The Unix timestamp up to which to return trades.
+
+          <br/>
+
+          > Cannot be more than 24 hours after the `start` parameter. Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      - name: tradeIdFrom
+        in: query
+        description: 'The unique identifier of the trade starting from which to return the trades.
+
+          '
+        required: false
+        schema:
+          type: string
+      - name: tradeIdTo
+        in: query
+        description: 'The unique identifier of the trade up to which to return the trades.
+
+          '
+        required: false
+        schema:
+          type: string
+      - name: tradeId
+        in: query
+        description: '**Deprecated**: `tradeId` is interpreted as `tradeIdTo`. If used, returns all trades up to this `tradeId`.
+
+          '
+        required: false
+        deprecated: true
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.trades('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.trades('BTC-EUR', {})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.Trades("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { for _, trade := range response { fmt.Printf("%+v\n", trade) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - operatorId
+                  properties:
+                    id:
+                      description: 'The unique identifier of the fill.
+
+                        '
+                      type: string
+                      example: 108c3633-0276-4480-a902-17a01829deae
+                    orderId:
+                      description: Bitvavo identifier of the order that was filled.
+                      type: string
+                      format: UUID
+                      example: 1d671998-3d44-4df4-965f-0d48bd129a1b
+                    clientOrderId:
+                      description: 'Your identifier of the order that was filled.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    operatorId:
+                      description: 'The identifier for the trader or the bot that made the request.
+
+                        '
+                      type: integer
+                      format: int64
+                      example: 543462
+                    timestamp:
+                      description: The Unix timestamp when the trade was made.
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1542967486256
+                    market:
+                      description: The market for which to return past trades.
+                      type: string
+                      example: BTC-EUR
+                    side:
+                      description: 'Indicates if the taker, who filled the order, is selling or buying.
+
+                        '
+                      type: string
+                      enum:
+                      - buy
+                      - sell
+                    amount:
+                      description: 'The amount of base currency exchanged in the trade.
+
+                        '
+                      type: string
+                      example: '0.005'
+                    price:
+                      description: 'The price of 1 unit of base currency in the amount of quote currency at the time of the trade.
+
+                        '
+                      type: string
+                      example: '5000.1'
+                    taker:
+                      description: Indicates whether you are the taker for the fill.
+                      type: boolean
+                      example: true
+                    fee:
+                      description: 'The fee that was paid. Value is negative for rebates. Only available if `settled` is true.
+
+                        '
+                      type: string
+                      example: '0.03'
+                    feeCurrency:
+                      description: 'Currency in which the fee was paid. Only available is `settled` is true.
+
+                        '
+                      type: string
+                      example: EUR
+                    settled:
+                      description: 'Indicates whether the fee was deducted and the exchanged
+
+                        currency is available for further trading.
+
+                        '
+                      type: boolean
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getTrades
+      x-operation-id-source: derived
+  /orders:
+    get:
+      tags:
+      - Trading
+      summary: Get orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns information about multiple orders.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: market
+        description: The market in which to get the order.
+        in: query
+        example: BTC-EUR
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: 'The maximum number of orders to return, from latest to earliest.
+
+          '
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - name: start
+        required: false
+        in: query
+        description: 'The Unix timestamp starting from which to return orders.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - name: end
+        required: false
+        in: query
+        description: 'The Unix timestamp up to which to return orders.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      - name: orderIdFrom
+        in: query
+        description: 'The unique identifier of the order starting from which to return the orders.
+
+          '
+        required: false
+        schema:
+          type: string
+          format: UUID
+      - name: orderIdTo
+        in: query
+        description: 'The unique identifier of the order up to which to return the orders.
+
+          '
+        required: false
+        schema:
+          type: string
+          format: UUID
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\nbitvavo.getOrders('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.getOrders('BTC-EUR', {})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.GetOrders("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { for _, order := range response { fmt.Printf("%+v\n", order) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: 'Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+
+                        '
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    clientOrderId:
+                      description: 'Your identifier of the order. Only returned if specified in the request.
+
+                        '
+                      type: string
+                      format: UUID
+                      example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9
+                    market:
+                      type: string
+                      example: BTC-EUR
+                      description: 'The market where you created an order.
+
+                        '
+                    created:
+                      description: 'The Unix timestamp when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    updated:
+                      description: 'The Unix timestamp when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706100650751
+                    status:
+                      description: "The status of an order. Possible values:\n- `new`: the `orderId` has been added to the order book and has not been filled.\n- `awaitingTrigger`: the conditions to fill an order haven't been met. \n- `canceled`: the `orderId` has been removed from the order book. \n- `expired`: the market order expires because there is no match, enough liquidity in the order book, or enough balance in your account.\n- `filled`: all trades necessary to complete the order have been filled. \n- `partiallyFilled`: the order is still active. Bitvavo needs to receive more matching orders to completely fill the order.  \n"
+                      type: string
+                      enum:
+                      - new
+                      - awaitingTrigger
+                      - canceled
+                      - expired
+                      - filled
+                      - partiallyFilled
+                    side:
+                      description: 'Indicates whether the order is to buy or sell the asset.
+
+                        '
+                      type: string
+                      enum:
+                      - buy
+                      - sell
+                    orderType:
+                      description: 'The type of order you created.
+
+                        '
+                      type: string
+                      enum:
+                      - limit
+                      - market
+                    amount:
+                      description: 'The quantity of the base currency to buy or sell.
+
+                        If you set `amountQuote` in your order, `amount` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    amountRemaining:
+                      description: 'The quantity of the base currency remaining after the sum of fills is subtracted from the `amount`.
+
+                        If you set `amountQuote` in your order, `amountRemaining` is not returned.
+
+                        '
+                      type: string
+                      example: '10'
+                    price:
+                      description: 'The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order.
+
+                        For other types of orders, the `price` is not returned.
+
+                        '
+                      type: string
+                      example: '7000'
+                    amountQuote:
+                      description: "The quantity of the quote currency to buy or sell for the market, `stopLoss`, or `takeProfit` types of order. \nIf you set `amount` in your order, `amountQuote` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    amountQuoteRemaining:
+                      description: "The quantity of the quote currency remaining after the sum of all fills is \nsubtracted from `amountQuote`.\n\nIf you set `amount` in the order, `amountQuoteRemaining` is not returned.\n"
+                      type: string
+                      example: '5000'
+                    onHold:
+                      description: 'The amount of `onHoldCurrency` locked while an order is not yet `settled` after an order is filled.
+
+                        All funds are released when order is filled.
+
+                        '
+                      type: string
+                      example: '70000'
+                    onHoldCurrency:
+                      description: 'The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+
+                        '
+                      type: string
+                      example: EUR
+                    triggerPrice:
+                      description: "The price calculated using `triggerAmount` and \n`triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` \ntypes of orders.   \n\nFor example, when you set `triggerAmount` to 4000 and `triggerType` to `price`, your order is placed in a `market` \nwhen the `triggerReference` price in quote currency reaches 4000.\n"
+                      type: string
+                      example: '4000'
+                    triggerAmount:
+                      description: "The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency.  \nThis value and `triggerType` are used to calculate `triggerPrice`.\n"
+                      type: string
+                      example: '4000'
+                    triggerType:
+                      description: 'The type of trigger you set to fill the order when the condition is met. This value and `triggerAmount` are used to calculate `triggerPrice`.
+
+                        '
+                      type: string
+                      enum:
+                      - price
+                    triggerReference:
+                      description: 'The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or  `takeProfitLimit` types of orders.
+
+                        '
+                      type: string
+                      enum:
+                      - lastTrade
+                      - bestBid
+                      - bestAsk
+                      - midPrice
+                    filledAmount:
+                      description: The total amount bought or sold in base currency.
+                      type: string
+                      example: '0'
+                    filledAmountQuote:
+                      description: The total amount bought or sold in quote currency.
+                      type: string
+                      example: '0'
+                    feePaid:
+                      description: 'The amount you pay Bitvavo to process the order. This value is negative for rebates. For more information, see
+
+                        GET [/account/fees](/docs/rest-api/get-market-fees).
+
+                        '
+                      type: string
+                      example: '0'
+                    feeCurrency:
+                      description: The currency of the `feePaid`.
+                      type: string
+                      example: EUR
+                    fills:
+                      description: 'A JSON object containing all fills for `orderId`.
+
+                        '
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            description: The identifier of this fill.
+                            type: string
+                            example: 371c6bd3-d06d-4573-9f15-18697cd210e5
+                          timestamp:
+                            description: 'A Unix timestamp when Bitvavo processed the fill.
+
+                              '
+                            type: integer
+                            format: unix-timestamp in milliseconds
+                            example: 1542967486256
+                          amount:
+                            description: The amount of base currency exchanged in the fill.
+                            type: string
+                            example: '0.005'
+                          price:
+                            description: The price of the fill in quote currency.
+                            type: string
+                            example: '5000.1'
+                          taker:
+                            description: Returns `true` when you are the taker for the fill.
+                            type: boolean
+                            example: true
+                          fee:
+                            description: "The amount you pay Bitvavo in `feeCurrency` to process the fill. For more information about your fees, see \nGET [/account/fees](/docs/rest-api/get-market-fees). This value is negative for rebates.\n\nIf `settled` is `false`, this parameter is not included in the return parameters.\n"
+                            type: string
+                            example: '0.03'
+                          feeCurrency:
+                            description: 'The currency that the `fee` is paid in.
+
+
+                              If `settled` is `false`, this object is not returned.
+
+                              '
+                            type: string
+                            example: EUR
+                          settled:
+                            description: "On Bitvavo, trade settlement happens after an order is filled. When the fill is complete and the `fee` is not yet \npaid, `settled` is `false`.\n"
+                            type: boolean
+                    selfTradePrevention:
+                      description: 'Indicates how to prevent self-trading for conflicting orders of any type.
+
+                        '
+                      type: string
+                      enum:
+                      - decrementAndCancel
+                      - cancelOldest
+                      - cancelNewest
+                      - cancelBoth
+                    visible:
+                      description: 'Returns `true` when the `orderId` is visible in the [order book](/docs/rest-api/get-order-book) for a `market`.
+
+                        '
+                      type: boolean
+                    timeInForce:
+                      description: 'The value you set for how long an order stays active.
+
+                        '
+                      type: string
+                      enum:
+                      - GTC
+                      - IOC
+                      - FOK
+                    postOnly:
+                      description: 'If true, cancels limit orders that match immediately. This ensures you pay the maker fee and not the taker fee.
+
+                        '
+                      type: boolean
+                    disableMarketProtection:
+                      description: 'Must be **false** because market protection can no longer be disabled.
+
+                        '
+                      type: boolean
+                      deprecated: true
+                    createdNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was created.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+                    updatedNs:
+                      description: 'The Unix timestamp in nanoseconds when the order was last updated.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in nanoseconds
+                      example: 1752139200000000000
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getOrders
+      x-operation-id-source: derived
+    delete:
+      tags:
+      - Trading
+      summary: Cancel orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Cancels multiple orders for the specified market or the account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **100** (without `market`) or **25** (with `market`).'
+      parameters:
+      - name: market
+        in: query
+        required: false
+        example: BTC-EUR
+        description: "The market in which to cancel the orders. \n<br/>\nIf not specified, all open orders are canceled.\n"
+        schema:
+          type: string
+      - name: operatorId
+        in: query
+        required: true
+        description: 'Your identifier for the trader or the bot within your account that made the request.
+
+          '
+        schema:
+          type: integer
+          format: int64
+          example: 543462
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.cancelOrders({ operatorId: 543462 }, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.cancelOrders({'BTC-EUR', 'operatorId': '543462'})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: "import . \"bitvavo\"\nbitvavo := Bitvavo{ApiKey:\"<APIKEY>\", ApiSecret:\"<APISECRET>\"}\n\nresponse, err := bitvavo.CancelOrders(map[string]string{\"market\": \"BTC-EUR\"})\nif err != nil {\n  fmt.Println(err)\n} else {\n  for _, order := range response {\n    fmt.Printf(\"%+v\\n\", order)\n  }\n}\n"
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: An array with the list of canceled orders.
+                items:
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: Bitvavo identifier of the canceled order.
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    operatorId:
+                      description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                        '
+                      type: integer
+                      format: int64
+                      example: 543462
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: deleteOrders
+      x-operation-id-source: derived
+  /atomic/orders:
+    delete:
+      tags:
+      - Trading
+      summary: Atomic cancel orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Cancels all open orders to buy or sell in the specified `market` as a single atomic request. The request is processed in strict arrival order and executed without interleaving with other operations.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **100**'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - market
+              - side
+              - operatorId
+              properties:
+                market:
+                  type: string
+                  description: 'The market in which to cancel all orders on the selected `side`.
+
+                    '
+                  example: BTC-EUR
+                side:
+                  type: string
+                  description: 'Cancels all **buy** orders or all **sell** orders in specified `market`.
+
+                    '
+                  enum:
+                  - buy
+                  - sell
+                operatorId:
+                  type: integer
+                  format: int64
+                  description: Your identifier for the trader or the bot within your account that made the request.
+                  example: 543462
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: An array with the list of canceled orders.
+                items:
+                  type: object
+                  properties:
+                    orderId:
+                      type: string
+                      format: UUID
+                      description: Bitvavo identifier of the canceled order.
+                      example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                    operatorId:
+                      description: 'Your identifier for the trader or the bot within your account that made the request.
+
+                        '
+                      type: integer
+                      format: int64
+                      example: 543462
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: deleteAtomicOrders
+      x-operation-id-source: derived
+  /cancelOrdersAfter:
+    post:
+      tags:
+      - Trading
+      summary: Cancel orders after
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Creates an identifier used to group open orders and sets the countdown timer after which those orders are automatically canceled.
+
+
+        To learn how to use this endpoint, see Cancel on disconnect.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::info
+
+        💡You can create only one group. If you need to create multiple groups, reach out to your Bitvavo contact to enable this.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - codGroupId
+              - expiryAfterSeconds
+              properties:
+                codGroupId:
+                  type: integer
+                  example: 1
+                  minimum: 1
+                  maximum: 1000
+                  description: 'Your identifier for a [group of orders](/docs/rest-api/cancel-orders-after/).
+
+                    '
+                expiryAfterSeconds:
+                  type: integer
+                  example: 30
+                  minimum: 10
+                  maximum: 300
+                  description: 'Your countdown timer in seconds after which open orders are canceled.
+
+                    '
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  codGroupId:
+                    type: integer
+                    example: 1
+                    description: 'Your identifier for a [group of orders](/docs/rest-api/cancel-orders-after/).
+
+                      '
+                  timeOfExpirySeconds:
+                    type: integer
+                    format: unix-timestamp in seconds
+                    example: 17202139111
+                    description: 'Your countdown timer in seconds after which open orders are canceled.
+
+                      '
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postCancelOrdersAfter
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

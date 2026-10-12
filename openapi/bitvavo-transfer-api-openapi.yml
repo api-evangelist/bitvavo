@@ -1,0 +1,694 @@
+openapi: 3.2.0
+info:
+  title: Bitvavo REST Transfer API
+  version: 2.10.0
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Transfer
+  description: Deposit and withdraw funds on Bitvavo.
+paths:
+  /deposit:
+    get:
+      tags:
+      - Transfer
+      summary: Get deposit data
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns wallet or bank account information required to deposit digital or fiat assets.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - in: query
+        description: The asset you want to deposit.
+        name: symbol
+        required: true
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.depositAssets('BTC', (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.depositAssets('BTC')\nprint(response)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.DepositAssets("BTC") if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Digital asset
+                  type: object
+                  properties:
+                    address:
+                      description: 'The address where to deposit assets.
+
+                        '
+                      type: string
+                      example: CryptoCurrencyAddress
+                    paymentid:
+                      description: 'If available, you need to specify `paymentid` with your deposit. It is sometimes called *note*, *memo*, or *tag*.
+
+                        '
+                      type: string
+                      example: '10002653'
+                - title: Fiat
+                  type: object
+                  properties:
+                    iban:
+                      description: International bank account number where to deposit assets.
+                      type: string
+                      example: NL32BUNQ2291234129
+                    bic:
+                      description: Bank identification code sometimes necessary for international transfers.
+                      type: string
+                      example: BUNQNL2A
+                    description:
+                      description: Description which must be used for the deposit.
+                      type: string
+                      example: 254D20CC94
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getDeposit
+      x-operation-id-source: derived
+  /depositHistory:
+    get:
+      tags:
+      - Transfer
+      summary: Get deposit history
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns all past deposits for your account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - in: query
+        name: symbol
+        description: 'The asset for which to return the deposit history. If not specified, all deposits are returned.
+
+          '
+        required: false
+        schema:
+          type: string
+      - in: query
+        description: 'The maximum number of deposits to return, from latest to earliest.
+
+          '
+        name: limit
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - in: query
+        name: start
+        description: 'The Unix timestamp starting from which to return deposits.
+
+          '
+        required: false
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - in: query
+        name: end
+        description: 'The Unix timestamp up to which to return deposits.
+
+          '
+        required: false
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.depositHistory({}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.depositHistory({})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.DepositHistory(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, deposit := range response { fmt.Printf("%+v\n", deposit) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Digital asset
+                  type: object
+                  properties:
+                    timestamp:
+                      description: The Unix timestamp when the deposit was made.
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706609321000
+                    symbol:
+                      type: string
+                      example: BTC
+                      description: 'The asset you deposited on Bitvavo.
+
+                        '
+                    amount:
+                      description: The quantity of the asset you deposited on Bitvavo.
+                      type: string
+                      example: '0.99994'
+                    address:
+                      description: 'The address where you deposited assets.
+
+                        '
+                      type: string
+                      example: 14qViLJfdGaP4EeHnDyJbEGQysnCpwk3gd
+                    paymentId:
+                      description: 'The unique identifier of the deposit. Returned if specified in the request.
+
+                        '
+                      type: string
+                      example: '10002653'
+                    txId:
+                      description: 'The unique identifier of the transaction on the blockchain.
+
+                        '
+                      type: string
+                      example: '927b3ea50c5bb52c6854152d305dfa1e27fc01d10464cf10825d96d69d235eb3
+
+                        '
+                    fee:
+                      description: The [transaction fee](https://bitvavo.com/en/fees) for a deposit on Bitvavo.
+                      type: string
+                      example: '0.000063'
+                - title: Fiat
+                  type: object
+                  properties:
+                    timestamp:
+                      description: The Unix timestamp when the deposit was made.
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1706609321000
+                    symbol:
+                      type: string
+                      example: EUR
+                      description: 'The currency you deposited on Bitvavo.
+
+                        '
+                    amount:
+                      description: The quantity of the asset you deposited on Bitvavo.
+                      type: string
+                      example: '500'
+                    fee:
+                      description: The [transaction fee](https://bitvavo.com/en/fees) for a deposit on Bitvavo.
+                      type: string
+                      example: '0'
+                    status:
+                      description: 'The state of the deposit. Can be **completed** or **canceled**.
+
+                        '
+                      type: string
+                      example: completed
+                    address:
+                      description: The bank account from which the deposit was made. For example, NL89BANK0123456789.
+                      type: string
+                      example: NL89BANK0123456789
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getDepositHistory
+      x-operation-id-source: derived
+  /withdrawal:
+    post:
+      tags:
+      - Transfer
+      summary: Withdraw assets
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Request to withdraw assets to a wallet or bank account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        2FA and address confirmation by email are disabled for withdrawals using the API.
+
+        :::
+
+
+        **Rate limit weight points**: **1**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - symbol
+              - amount
+              - address
+              properties:
+                symbol:
+                  type: string
+                  example: BTC
+                  description: The asset you want to withdraw.
+                amount:
+                  description: The quantity of the asset to withdraw.
+                  type: string
+                  example: '1.5'
+                address:
+                  description: 'The address where to withdraw assets.
+
+                    <br/>
+
+                    > You can only withdraw to addresses which you have added and confirmed in your address book. Funds cannot be recovered after being withdrawn to the wrong address.
+
+                    '
+                  type: string
+                  example: BitcoinAddress
+                paymentId:
+                  description: 'The unique identifier of the transaction of a digital asset. It is sometimes called *note*, *memo*, or *tag*.
+
+                    Should be specified when withdrawing straight to another exchange or merchants that require a `paymentId`.
+
+                    '
+                  type: string
+                  example: '10002653'
+                internal:
+                  description: '**Deprecated** Do not use or set to **false** to avoid errors.
+
+                    '
+                  type: boolean
+                  default: false
+                  deprecated: true
+                addWithdrawalFee:
+                  description: 'Indicates if a fee is added in addition to the requested amount. If **false**, the fee is part of the requested amount and
+
+                    subtracted from the withdrawal.
+
+                    '
+                  type: boolean
+                  default: false
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.withdrawAssets('BTC', '2', 'BitcoinAddress', {}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.withdrawAssets('BTC', '1', 'BitcoinAddress', {})\nprint(response)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.WithdrawAssets("BTC", "1", "BitcoinAddress", map[string]string{}) if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates if the withdrawal request was successful.
+                    type: boolean
+                    example: true
+                  symbol:
+                    type: string
+                    example: BTC
+                    description: The asset that was withdrawn.
+                  amount:
+                    description: The total amount deducted from your balance.
+                    type: string
+                    example: '1.5'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postWithdrawal
+      x-operation-id-source: derived
+  /crypto/withdrawal:
+    post:
+      tags:
+      - Transfer
+      summary: Withdraw crypto assets
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Request to withdraw crypto assets to a wallet over the specified network.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **25**'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - asset
+              - network
+              - address
+              - amount
+              properties:
+                asset:
+                  type: string
+                  minLength: 1
+                  maxLength: 10
+                  example: BTC
+                  description: 'The asset you want to withdraw.
+
+                    '
+                network:
+                  type: string
+                  minLength: 1
+                  maxLength: 10
+                  example: BTC
+                  description: 'The network you want to withdraw the asset to.
+
+                    '
+                address:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  example: BitcoinAddress
+                  description: 'The address where to withdraw the asset to.
+
+                    <br/>
+
+                    > Make sure to check the address. Funds cannot be recovered after being withdrawn to the wrong address.
+
+                    '
+                amount:
+                  type: string
+                  example: '0.05'
+                  description: 'The amount to withdraw as a decimal string.
+
+                    '
+                deductFeeFromAmount:
+                  type: boolean
+                  default: false
+                  description: 'If **false** (default), the recipient receives the full `amount` and the fee is charged separately. If **true**, the fee is deducted from `amount` before it is sent.
+
+                    '
+                idempotencyKey:
+                  type: string
+                  minLength: 5
+                  maxLength: 50
+                  example: unique-key-123
+                  description: 'Retries with the same key return the existing withdrawal when the request matches; otherwise the request is rejected.
+
+                    '
+                memo:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: 'Memo or tag for networks that require it. Must match the one from the address book. Also known as *note* or *paymentId*.
+
+                    '
+            example:
+              asset: BTC
+              network: BTC
+              address: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+              amount: '0.05'
+              deductFeeFromAmount: false
+              idempotencyKey: unique-key-123
+      responses:
+        '201':
+          description: The withdrawal was created.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The unique identifier of the withdrawal.
+                    example: wd-abc123
+                  asset:
+                    type: string
+                    minLength: 1
+                    maxLength: 10
+                    example: BTC
+                    description: 'The asset that was withdrawn.
+
+                      '
+                  network:
+                    type: string
+                    minLength: 1
+                    maxLength: 10
+                    example: BTC
+                    description: 'The network the asset was withdrawn to.
+
+                      '
+                  address:
+                    type: string
+                    minLength: 1
+                    maxLength: 500
+                    example: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                    description: The address where the asset was withdrawn to.
+                  amount:
+                    type: string
+                    example: '0.05'
+                    description: 'The amount that was withdrawn as a decimal string.
+
+                      '
+                  fee:
+                    type: string
+                    example: '0.0001'
+                    description: The withdrawal fee as a decimal string.
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: '2026-05-19T12:00:00.000Z'
+                    description: The creation time of the withdrawal.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postCryptoWithdrawal
+      x-operation-id-source: derived
+  /withdrawalHistory:
+    get:
+      tags:
+      - Transfer
+      summary: Get withdrawal history
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns all past withdrawals for your account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - in: query
+        name: symbol
+        description: 'The asset for which you want to retrieve past withdrawals. If not specified, all withdrawals are returned.
+
+          '
+        required: false
+        schema:
+          type: string
+      - in: query
+        description: 'The maximum number of withdrawals to return, from latest to earliest.
+
+          '
+        name: limit
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - in: query
+        name: start
+        description: 'The Unix timestamp starting from which to return withdrawals.
+
+          '
+        required: false
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - in: query
+        name: end
+        description: 'The Unix timestamp up to which to return withdrawals.
+
+          '
+        required: false
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')().options({\n  APIKEY: '<APIKEY>',\n  APISECRET: '<APISECRET>'\n})\n\nbitvavo.withdrawalHistory({}, (error, response) => {\n  if (error === null) {\n    console.log(response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo({\n    'APIKEY': '<APIKEY>',\n    'APISECRET': '<APISECRET>'\n})\nresponse = bitvavo.withdrawalHistory({})\nfor item in response:\n  print(item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{ApiKey:"<APIKEY>", ApiSecret:"<APISECRET>"}
+
+          response, err := bitvavo.WithdrawalHistory(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, withdrawal := range response { fmt.Printf("%+v\n", withdrawal) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timestamp:
+                    description: The Unix timestamp when the withdrawal was made.
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1542967486256
+                  symbol:
+                    type: string
+                    example: BTC
+                    description: The asset that was withdrawn.
+                  amount:
+                    description: The quantity of the asset that was withdrawn.
+                    type: string
+                    example: '0.99994'
+                  address:
+                    description: The address where the withdrawal was made.
+                    type: string
+                    example: BitcoinAddress
+                  paymentId:
+                    description: 'The unique identifier of the withdrawal. It is sometimes called *note*, *memo*, or *tag*. Not returned if not specified in the request.
+
+                      '
+                    type: string
+                    example: '10002653'
+                  txId:
+                    description: 'The unique identifier of the transaction on the blockchain.
+
+                      '
+                    type: string
+                    example: '927b3ea50c5bb52c6854152d305dfa1e27fc01d10464cf10825d96d69d235eb3
+
+                      '
+                  fee:
+                    description: The [transaction fee](https://bitvavo.com/en/fees) for a withdrawal on Bitvavo.
+                    type: string
+                    example: '0.00006'
+                  status:
+                    description: The status of the withdrawal.
+                    type: string
+                    enum:
+                    - awaiting_processing
+                    - awaiting_email_confirmation
+                    - awaiting_bitvavo_inspection
+                    - approved
+                    - sending
+                    - in_mempool
+                    - processed
+                    - completed
+                    - canceled
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getWithdrawalHistory
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

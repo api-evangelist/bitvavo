@@ -1,0 +1,28 @@
+{
+  "provider": "bitvavo",
+  "sources": [
+    "bitvavo-exchange-rest-openapi.yml",
+    "bitvavo-institutional-openapi.yml"
+  ],
+  "outputs": [
+    "bitvavo-account-api-openapi.yml",
+    "bitvavo-market-data-api-openapi.yml",
+    "bitvavo-synchronization-api-openapi.yml",
+    "bitvavo-trading-api-openapi.yml",
+    "bitvavo-transfer-api-openapi.yml",
+    "bitvavo-account-management-api-openapi.yml",
+    "bitvavo-subaccounts-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/bitvavo-exchange-rest-openapi.yml",
+    "archived openapi/bitvavo-institutional-openapi.yml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "bitvavo-exchange-rest-openapi.yml: upgraded openapi 3.0.2 -> OpenAPI 3.2.0",
+    "bitvavo-institutional-openapi.yml: upgraded openapi 3.0.2 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+7 apis, 10 total)"
+  ],
+  "skipped": []
+}

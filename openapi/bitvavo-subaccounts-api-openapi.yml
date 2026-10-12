@@ -1,0 +1,728 @@
+openapi: 3.2.0
+info:
+  title: Institutional REST Subaccounts API
+  version: 2.10.0
+  description: Get information about your subaccounts and manage orders.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Subaccounts
+  description: Get information about your subaccounts and manage orders.
+paths:
+  /institutional/subaccounts/balance:
+    get:
+      tags:
+      - Subaccounts
+      summary: Get balance
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns the current balance for the specified subaccount. If not specified, returns the balance for the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Include all subaccounts**.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: subaccountId
+        in: query
+        description: The unique identifier for the subaccount. If not specified, returns the account balance of the main account.
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: symbol
+        in: query
+        description: Asset to return the balance for. If not specified, returns all assets with balance higher than 0.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - balances
+                properties:
+                  balances:
+                    type: array
+                    description: The balances array with an object per subaccount.
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                          description: The asset for which to return the balance (e.g., EUR, BTC, ETH).
+                        available:
+                          type: string
+                          description: The amount available for transfer or ordering.
+                        inOrder:
+                          type: string
+                          description: The amount reserved by open orders.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getInstitutionalSubaccountsBalance
+      x-operation-id-source: derived
+  /institutional/subaccounts/history:
+    get:
+      tags:
+      - Subaccounts
+      summary: Get transaction history
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns a list of past transactions for the specified subaccount or the specified date range. If the subaccount is not specified, returns transactions for all subaccounts under the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Include all subaccounts**.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: subaccountId
+        in: query
+        description: The unique identifier for the subaccount.
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: fromDate
+        in: query
+        description: The Unix timestamp in milliseconds starting from which to return transactions.
+        required: false
+        schema:
+          type: integer
+      - name: toDate
+        in: query
+        description: The Unix timestamp in milliseconds up to which to return transactions.
+        required: false
+        schema:
+          type: integer
+      - name: page
+        in: query
+        description: The page number for the transaction history.
+        required: false
+        schema:
+          type: integer
+      - name: maxItems
+        in: query
+        description: The maximum number of items per page in the transaction history.
+        required: false
+        schema:
+          type: integer
+      - name: type
+        in: query
+        description: The type of transaction to return.
+        required: false
+        schema:
+          type: string
+          enum:
+          - sell
+          - buy
+          - staking
+          - fixed_staking
+          - deposit
+          - withdrawal
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    description: Array of objects per returned transactionId.
+                    items:
+                      type: object
+                      properties:
+                        transactionId:
+                          type: string
+                          description: The unique identifier of the transaction.
+                        executedAt:
+                          type: string
+                          description: The Unix timestamp when the transaction was executed.
+                          format: date-time
+                        type:
+                          type: string
+                          description: The type of transaction.
+                          enum:
+                          - sell
+                          - buy
+                          - staking
+                          - fixed_staking
+                          - deposit
+                          - withdrawal
+                          - affiliate
+                          - distribution
+                          - internal_transfer
+                          - withdrawal_cancelled
+                          - rebate
+                          - loan
+                          - external_transferred_funds
+                          - manually_assigned
+                          - manually_assigned_bitvavo
+                        priceCurrency:
+                          type: string
+                          description: The currency in which the transaction was made.
+                        priceAmount:
+                          type: string
+                          description: The amount of the transaction.
+                        sentCurrency:
+                          type: string
+                          description: The currency that was sent in the transaction.
+                        sentAmount:
+                          type: string
+                          description: The amount that was sent in the transaction.
+                        receivedCurrency:
+                          type: string
+                          description: The currency that was received in the transaction.
+                        receivedAmount:
+                          type: string
+                          description: The amount that was received in the transaction.
+                        feesCurrency:
+                          type: string
+                          description: The currency in which the fees were paid.
+                        feesAmount:
+                          type: string
+                          description: The amount of fees paid in the transaction.
+                        address:
+                          type:
+                          - string
+                          - 'null'
+                          description: The address where the transaction was made.
+                  currentPage:
+                    type: integer
+                    description: The current page number.
+                  totalPages:
+                    type: integer
+                    description: The total number of returned pages.
+                  maxItems:
+                    type: integer
+                    description: The maximum number of transactions per page.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getInstitutionalSubaccountsHistory
+      x-operation-id-source: derived
+  /institutional/subaccounts/orders/open:
+    get:
+      tags:
+      - Subaccounts
+      summary: Get open orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns all current open orders for the specified subaccount. If not specified, returns open orders for the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Include all subaccounts**.
+
+        ::::
+
+
+        **Rate limit weight points**: **100** (without `market`) or **5** (with `market`).'
+      parameters:
+      - name: subaccountId
+        in: query
+        description: The unique identifier for the subaccount. If not specified, returns open orders for the main account.
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: market
+        in: query
+        description: The market in which to return the open orders. If not specified, all open orders are returned.
+        required: false
+        schema:
+          type: string
+      - name: base
+        in: query
+        description: The base asset for which to return the open orders. If neither market nor base are specified, all open orders are returned.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    subaccountId:
+                      type: string
+                      description: The unique identifier for the subaccount.
+                      format: uuid
+                    orderId:
+                      type: string
+                      description: Bitvavo identifier of the order. An `orderId` is unique per `market`. Different markets can use the same `orderId` values.
+                      format: uuid
+                    clientOrderId:
+                      type: string
+                      description: Your identifier of the order. Only returned if specified in the request.
+                      format: uuid
+                    market:
+                      type: string
+                      description: The market where you created an order.
+                    created:
+                      type: integer
+                      description: The Unix timestamp when the order was created.
+                    updated:
+                      type: integer
+                      description: The Unix timestamp when the order was last updated.
+                    status:
+                      type: string
+                      description: The status of an order.
+                      enum:
+                      - new
+                      - awaitingTrigger
+                      - canceled
+                      - expired
+                      - filled
+                      - partiallyFilled
+                    side:
+                      type: string
+                      description: Indicates whether the order is to buy or sell the asset.
+                      enum:
+                      - buy
+                      - sell
+                    orderType:
+                      type: string
+                      description: The type of order you created.
+                      enum:
+                      - limit
+                      - market
+                    amount:
+                      type: string
+                      description: The quantity of the base currency to buy or sell. If you set amountQuote in your order, amount is not returned.
+                    amountRemaining:
+                      type: string
+                      description: The quantity of the base currency remaining after the sum of fills is subtracted from the amount. If you set `amountQuote` in your order, `amountRemaining` is not returned.
+                    price:
+                      type: string
+                      description: The price you set for a `limit`, `stopLossLimit`, `takeProfit`, or a `takeProfitLimit` order. For other types of orders, the `price` is not returned.
+                    amountQuote:
+                      type: string
+                      description: The quantity of the quote currency to buy or sell for the `market`, `stopLoss`, or `takeProfit` types of order. If you set `amount` in your order, `amountQuote` is not returned.
+                    amountQuoteRemaining:
+                      type: string
+                      description: The quantity of the quote currency remaining after the sum of all fills is subtracted from `amountQuote`. If you set `amount` in the order, `amountQuoteRemaining` is not returned.
+                    onHold:
+                      type: string
+                      description: The amount of `onHoldCurrency` locked while an order is not yet settled after an order is filled. All funds are released when order is filled.
+                    onHoldCurrency:
+                      type: string
+                      description: The currency that is `onHold` while the order is processed. This depends on the `side` you set for the `orderId`.
+                    triggerPrice:
+                      type: string
+                      description: The price calculated using `triggerAmount` and `triggerType` for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+                    triggerAmount:
+                      type: string
+                      description: The trigger price in quote currency for which you want to buy or sell 1 unit of the base currency. This value and `triggerType` are used to calculate `triggerPrice`.
+                    triggerType:
+                      type: string
+                      description: The type of trigger you set to fill the order when the condition is met.
+                      enum:
+                      - price
+                    triggerReference:
+                      type: string
+                      description: The price you set to trigger the order to be filled for the `stopLoss`, `stopLossLimit`, `takeProfit`, or `takeProfitLimit` types of orders.
+                      enum:
+                      - lastTrade
+                      - bestBid
+                      - bestAsk
+                      - midPrice
+                    filledAmount:
+                      type: string
+                      description: The total amount bought or sold in base currency.
+                    filledAmountQuote:
+                      type: string
+                      description: The total amount bought or sold in quote currency.
+                    feePaid:
+                      type: string
+                      description: The amount you pay Bitvavo to process the order. This value is negative for rebates.
+                    feeCurrency:
+                      type: string
+                      description: The currency of the `feePaid`.
+                    fills:
+                      type: array
+                      description: A JSON object containing all fills for orderId.
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: The identifier of this fill.
+                          timestamp:
+                            type: integer
+                            description: A Unix timestamp when Bitvavo processed the fill.
+                          amount:
+                            type: string
+                            description: The amount of base currency exchanged in the fill.
+                          price:
+                            type: string
+                            description: The price of the fill in quote currency.
+                          taker:
+                            type: boolean
+                            description: Returns `true` when you are the taker for the fill.
+                          fee:
+                            type: string
+                            description: The amount you pay Bitvavo in `feeCurrency` to process the fill. This value is negative for rebates. If `settled` is `false`, this parameter is not included.
+                          feeCurrency:
+                            type: string
+                            description: The currency that the `fee` is paid in. If `settled` is `false`, this object is not returned.
+                          settled:
+                            type: boolean
+                            description: Indicates whether the fill has been settled.
+                    selfTradePrevention:
+                      type: string
+                      description: Indicates how to prevent self-trading for conflicting orders of any type..
+                      enum:
+                      - decrementAndCancel
+                      - cancelOldest
+                      - cancelNewest
+                      - cancelBoth
+                    visible:
+                      type: boolean
+                      description: Returns true when the `orderId` is visible in the order book for a market.
+                    timeInForce:
+                      type: string
+                      description: The value you set for how long an order stays active.
+                      enum:
+                      - GTC
+                      - IOC
+                      - FOK
+                    postOnly:
+                      type: boolean
+                      description: The value you set for how your fees are calculated for `limit`, `stopLossLimit`, or `takeProfitLimit` types of orders.
+                    disableMarketProtection:
+                      type: boolean
+                      description: Must be false because market protection can no longer be disabled.
+                    operatorId:
+                      type: integer
+                      description: Your identifier for the trader or the bot within your account that made the request.
+                    createdNs:
+                      type: integer
+                      description: The Unix timestamp in nanoseconds when the order was created.
+                    updatedNs:
+                      type: integer
+                      description: The Unix timestamp in nanoseconds when the order was last updated.
+                    codGroupId:
+                      type: integer
+                      description: Your identifier for a group of orders.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getInstitutionalSubaccountsOrdersOpen
+      x-operation-id-source: derived
+  /institutional/subaccounts/order:
+    delete:
+      tags:
+      - Subaccounts
+      summary: Cancel order
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Cancels a single open order for the specified subaccount. If the subaccount is not specified, cancels the order for the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Include all subaccounts**.
+
+        ::::
+
+
+        **Rate limit weight points**: **1**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - market
+              - orderId
+              - operatorId
+              properties:
+                subaccountId:
+                  type: string
+                  description: The unique identifier for the subaccount. If not specified, orders under the main account are cancelled.
+                  format: uuid
+                market:
+                  type: string
+                  description: The market in which order was made.
+                  example: BTC-EUR
+                orderId:
+                  type: string
+                  description: Bitvavo identifier of the order. If both `clientOrderId` and `orderId` are set, `clientOrderId` is used to identify the order.
+                  format: uuid
+                  example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                clientOrderId:
+                  type: string
+                  description: Your identifier of the order. If both `clientOrderId` and `orderId` are set, `clientOrderId` is used to identify the order.
+                  format: uuid
+                  example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9.
+                operatorId:
+                  type: integer
+                  description: Your identifier for the trader or the bot within your account that made the request.
+                  example: 1
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    description: Bitvavo identifier of the order.
+                    format: uuid
+                    example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                  clientOrderId:
+                    type: string
+                    description: Your identifier of the cancelled order. Only returned if specified in the request.
+                    format: uuid
+                    example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9.
+                  operatorId:
+                    type: integer
+                    description: Your identifier for the trader or the bot within your account that made the request.
+                    example: 1
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: deleteInstitutionalSubaccountsOrder
+      x-operation-id-source: derived
+  /institutional/subaccounts/orders:
+    delete:
+      tags:
+      - Subaccounts
+      summary: Cancel orders
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Cancels multiple orders for the specified subaccount or market. If the subaccount is not specified, orders for the main account are canceled.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Include all subaccounts**.
+
+        ::::
+
+
+        **Rate limit weight points**: **100** (without `market`) or **25** (with `market`).'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - operatorId
+              properties:
+                subaccountId:
+                  type: string
+                  description: The unique identifier for the subaccount. If not specified, orders under the main account are cancelled.
+                  format: uuid
+                market:
+                  type: string
+                  description: When specified, orders are canceled only for a specific market.
+                  example: BTC-EUR
+                operatorId:
+                  type: integer
+                  description: Your identifier for the trader or the bot within your account that made the request.
+                  example: 1
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    description: Array of objects with cancelled orders.
+                    items:
+                      type: object
+                      properties:
+                        orderId:
+                          type: string
+                          description: Bitvavo identifier of the cancelled order.
+                          format: uuid
+                          example: 1be6d0df-d5dc-4b53-a250-3376f3b393e6
+                        clientOrderId:
+                          type: string
+                          description: Your identifier of the cancelled order. Only returned if specified in the request.
+                          format: uuid
+                          example: 2be7d0df-d8dc-7b93-a550-8876f3b393e9.
+                        operatorId:
+                          type: integer
+                          description: Identifier for the trader or bot that made request.
+                          example: 1
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: deleteInstitutionalSubaccountsOrders
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/institutional-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/institutional-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

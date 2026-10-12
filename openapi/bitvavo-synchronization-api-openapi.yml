@@ -1,0 +1,350 @@
+openapi: 3.2.0
+info:
+  title: Bitvavo REST Synchronization API
+  version: 2.10.0
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Synchronization
+  description: Synchronize markets and assets data with your app.
+paths:
+  /time:
+    get:
+      tags:
+      - Synchronization
+      summary: Get server time
+      description: 'Returns the current Unix timestamp of Bitvavo servers.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: **1**'
+      x-codeSamples:
+      - lang: Python
+        source: 'from python_bitvavo_api.bitvavo import Bitvavo
+
+          bitvavo = Bitvavo() response = bitvavo.time() print(''Current time:'', response[''time''])'
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.time((error, response) => {\n  if (error === null) {\n    console.log('Current time: ', response.time)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Time() if err != nil { fmt.Println(err) } else { fmt.Println(response.Time) }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time:
+                    description: The current Unix timestamp of Bitvavo servers.
+                    type: integer
+                    format: unix-timestamp in milliseconds
+                    example: 1539180275424
+                  timeNs:
+                    description: The current Unix timestamp of Bitvavo servers in nanoseconds.
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getTime
+      x-operation-id-source: derived
+  /markets:
+    get:
+      tags:
+      - Synchronization
+      summary: Get markets
+      description: 'Returns the information about one or all markets on Bitvavo.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - in: query
+        name: market
+        example: BTC-EUR
+        description: The market for which to return information.
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\n// If all markets should be returned, pass an empty options object.\nbitvavo.markets({}, (error, response) => {\n  if (error === null) {\n    for (let object of response) {\n      console.log('Market response: ', object)\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.markets({})\nfor market in response:\n  print(market)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Markets(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, market := range response { fmt.Printf("%+v\n", market) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    market:
+                      description: The market for which you requested information.
+                      type: string
+                      example: BTC-EUR
+                    status:
+                      description: "The [status of the market](/docs/order-lifecycle/#market-status) for which you requested information. \nTo learn how markets in different statuses work, see [Trading Rules](https://bitvavo.com/en/trading-rules).\n"
+                      type: string
+                      enum:
+                      - trading
+                      - halted
+                      - auction
+                      - auctionMatching
+                      - cancelOnly
+                      example: trading
+                    base:
+                      description: 'The base currency of the specified market.
+
+                        '
+                      type: string
+                      example: BTC
+                    quote:
+                      description: 'The quote currency of the specified market.
+
+                        '
+                      type: string
+                      example: EUR
+                    pricePrecision:
+                      description: 'The number of digits allowed in the price when the order was created.
+
+                        '
+                      type: integer
+                      example: '5'
+                      deprecated: true
+                    minOrderInBaseAsset:
+                      description: 'The minimum amount of base currency for an order in the specified market.
+
+                        '
+                      type: string
+                      example: '0.0001'
+                    minOrderInQuoteAsset:
+                      description: 'The minimum amount of quote currency for an order in the specified market.
+
+                        '
+                      type: string
+                      example: '5'
+                    maxOrderInBaseAsset:
+                      description: 'The maximum amount of base currency for an order in the specified market.
+
+                        '
+                      type: string
+                      example: '1000000000'
+                    maxOrderInQuoteAsset:
+                      description: 'The maximum amount of quote currency for an order in the specified market.
+
+                        '
+                      type: string
+                      example: '1000000000'
+                    orderTypes:
+                      description: 'The types of orders that can be placed in the specified market.
+
+                        '
+                      type: array
+                      items:
+                        type: string
+                        enum:
+                        - market
+                        - limit
+                        - stopLoss
+                        - stopLossLimit
+                        - takeProfit
+                        - takeProfitLimit
+                      example:
+                      - market
+                      - limit
+                      - stopLoss
+                      - stopLossLimit
+                      - takeProfit
+                      - takeProfitLimit
+                    quantityDecimals:
+                      description: 'The maximum number of decimals in the `amount` of an order.
+
+                        '
+                      type: integer
+                      example: '4'
+                    notionalDecimals:
+                      description: 'The maximum number of decimal places allowed for `amountQuote` (quote currency amount).
+
+                        '
+                      type: integer
+                      example: '2'
+                    tickSize:
+                      description: 'The minimum price increment of the market.
+
+                        '
+                      type: string
+                      example: '0.01'
+                    maxOpenOrders:
+                      description: 'The maximum number of open orders allowed in a market per account.
+
+                        '
+                      type: integer
+                      example: 100
+                    feeCategory:
+                      description: 'The [fee category](https://bitvavo.com/en/fees) of the market.
+
+                        '
+                      type: string
+                      example: A
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getMarkets
+      x-operation-id-source: derived
+  /assets:
+    get:
+      tags:
+      - Synchronization
+      summary: Get asset data
+      description: 'Returns the information about the specified assets.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: **1**'
+      parameters:
+      - in: query
+        example: BTC
+        description: The asset for which to return the information. If not specified, all supported assets are returned.
+        name: symbol
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.assets({}, (error, response) => {\n  if (error === null) {\n    for (let object of response) {\n      console.log('Asset: ', object)\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.assets({})\nfor asset in response:\n  print(asset)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Assets(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, asset := range response { fmt.Printf("%+v\n", asset) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    symbol:
+                      description: The asset for which the information is returned.
+                      type: string
+                      example: BTC
+                    name:
+                      description: The full name of the asset.
+                      type: string
+                      example: Bitcoin
+                    decimals:
+                      description: The number of decimal digits for this asset.
+                      type: integer
+                      example: 8
+                    depositFee:
+                      description: The fee for depositing the asset.
+                      type: string
+                      example: '0'
+                    depositConfirmations:
+                      description: 'The minimum number of network confirmations to credit the asset to your account.
+
+                        '
+                      type: integer
+                      example: 10
+                    depositStatus:
+                      description: The status of the asset being deposited.
+                      type: string
+                      enum:
+                      - OK
+                      - MAINTENANCE
+                      - DELISTED
+                    withdrawalFee:
+                      description: The fee for withdrawing the asset.
+                      type: string
+                      example: '0.2'
+                    withdrawalMinAmount:
+                      description: The minimum amount that can be withdrawn.
+                      type: string
+                      example: '0.2'
+                    withdrawalStatus:
+                      description: The status of the asset being withdrawn.
+                      type: string
+                      enum:
+                      - OK
+                      - MAINTENANCE
+                      - DELISTED
+                    networks:
+                      type: array
+                      description: The list of supported networks.
+                      items:
+                        type: array
+                        items:
+                          type: string
+                      example:
+                      - Mainnet
+                    message:
+                      description: 'The reason if the `withdrawalStatus` or `depositStatus` is not `OK`.
+
+                        '
+                      type: string
+                      example: ''
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getAssets
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

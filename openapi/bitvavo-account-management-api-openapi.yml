@@ -1,0 +1,616 @@
+openapi: 3.2.0
+info:
+  title: Institutional REST Account Management API
+  version: 2.10.0
+  description: Create and manage multiple subaccounts under one main account and transfer funds between them.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Account Management
+  description: Create and manage multiple subaccounts under one main account and transfer funds between them.
+paths:
+  /subaccounts:
+    post:
+      tags:
+      - Account Management
+      summary: Create subaccount
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Creates a new subaccount under the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Administrative** permission.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  description: Your description of the subaccount, up to 100 characters.
+                  maxLength: 100
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - id
+                - type
+                - status
+                properties:
+                  id:
+                    type: string
+                    description: The unique identifier of the subaccount.
+                  type:
+                    type: string
+                    description: The type of the subaccount.
+                    enum:
+                    - spot
+                    - margin
+                  status:
+                    type: string
+                    description: The status of the subaccount.
+                    enum:
+                    - open
+                    - closed
+                  label:
+                    type: string
+                    description: Your description of the subaccount, up to 100 characters.
+                    maxLength: 100
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postSubaccounts
+      x-operation-id-source: derived
+    get:
+      tags:
+      - Account Management
+      summary: Get subaccounts
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Retrieves the list of all subaccounts under the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::info
+
+        To use this private endpoint, you must use the API key of your main account with the **Administrative** permission.
+
+        :::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: page
+        in: query
+        description: Your description of the subaccount, up to 100 characters.
+        required: false
+        schema:
+          type: integer
+      - name: maxItems
+        in: query
+        description: The maximum number of subaccounts per page.
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    description: Array of objects per returned `subaccountId`.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: The unique identifier of the subaccount.
+                          format: uuid
+                        type:
+                          type: string
+                          description: The type of the subaccount.
+                          enum:
+                          - spot
+                          - margin
+                        status:
+                          type: string
+                          description: Status of the subaccount.
+                          enum:
+                          - open
+                          - closed
+                        label:
+                          type: string
+                          description: Your description of the subaccount, up to 100 characters.
+                          maxLength: 100
+                  currentPage:
+                    type: integer
+                    description: The current page number.
+                  totalPages:
+                    type: integer
+                    description: The total number of returned pages.
+                  maxItems:
+                    type: integer
+                    description: The maximum number of subaccounts per page.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getSubaccounts
+      x-operation-id-source: derived
+  /subaccounts/transfers:
+    post:
+      tags:
+      - Account Management
+      summary: Create transfer
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Makes a deposit or withdrawal by creating a transfer of assets between your subaccounts and the main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Internal transfer permission** permission.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - subaccountId
+              - direction
+              - symbol
+              - amount
+              properties:
+                subaccountId:
+                  type: string
+                  description: The unique identifier for the subaccount.
+                  format: uuid
+                direction:
+                  type: string
+                  description: Indicates the direction of the transfer.
+                  enum:
+                  - masterToSub
+                  - subToMaster
+                symbol:
+                  type: string
+                  description: The asset to transfer.
+                amount:
+                  type: string
+                  description: The quantity of the asset to transfer.
+                clientRequestId:
+                  type: string
+                  description: Your identifier of the transfer.
+                  format: uuid
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - transferId
+                - subaccountId
+                - direction
+                - symbol
+                - amount
+                - status
+                - createdAt
+                properties:
+                  transferId:
+                    type: string
+                    description: Bitvavo identifier of the transfer.
+                    format: uuid
+                  clientRequestId:
+                    type: string
+                    description: Your identifier of the transfer.
+                    format: uuid
+                  subaccountId:
+                    type: string
+                    description: The unique identifier for the subaccount.
+                    format: uuid
+                  direction:
+                    type: string
+                    description: Indicates the direction of the transfer.
+                    enum:
+                    - masterToSub
+                    - subToMaster
+                  symbol:
+                    type: string
+                    description: The asset that was transferred.
+                  amount:
+                    type: string
+                    description: The quantity of the asset to transfer.
+                  status:
+                    type: string
+                    description: Status of the transfer.
+                    enum:
+                    - failed
+                    - pending
+                    - completed
+                  createdAt:
+                    type: string
+                    description: The Unix timestamp when the transfer was created.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: postSubaccountsTransfers
+      x-operation-id-source: derived
+    get:
+      tags:
+      - Account Management
+      summary: Get transfers
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns information about multiple transfers of assets between a subaccount and your main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Internal transfer permission**.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: subaccountId
+        in: query
+        description: The unique identifier for the subaccount.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: clientRequestId
+        in: query
+        description: Your identifier of the transfer.
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: start
+        in: query
+        description: The Unix timestamp in milliseconds starting from which to return transfers.
+        required: false
+        schema:
+          type: integer
+      - name: end
+        in: query
+        description: The Unix timestamp in milliseconds starting up to which to return transfers.
+        required: false
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        description: The maximum number of transfers to return.
+        required: false
+        minimum: 1
+        maximum: 1000
+        default: 25
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - items
+                - start
+                - end
+                - limit
+                properties:
+                  items:
+                    type: array
+                    description: An array of objects per returned transferId.
+                    items:
+                      type: object
+                      required:
+                      - transferId
+                      - subaccountId
+                      - direction
+                      - symbol
+                      - amount
+                      - status
+                      - createdAt
+                      properties:
+                        transferId:
+                          type: string
+                          description: Bitvavo identifier of the transfer.
+                          format: uuid
+                        clientRequestId:
+                          type: string
+                          description: Your identifier of the transfer.
+                          format: uuid
+                        subaccountId:
+                          type: string
+                          description: The unique identifier for the subaccount.
+                          format: uuid
+                        direction:
+                          type: string
+                          description: Indicates the direction of the transfer.
+                          enum:
+                          - masterToSub
+                          - subToMaster
+                        symbol:
+                          type: string
+                          description: The asset that was transferred.
+                        amount:
+                          type: string
+                          description: The quantity of the asset to transfer.
+                        status:
+                          type: string
+                          description: Status of the transfer.
+                          enum:
+                          - failed
+                          - pending
+                          - completed
+                        createdAt:
+                          type: string
+                          description: The Unix timestamp when the transfer was created.
+                  start:
+                    type: integer
+                    description: The Unix timestamp in milliseconds starting from which to return transfers.
+                  end:
+                    type: integer
+                    description: The Unix timestamp in milliseconds starting up to which to return transfers.
+                  limit:
+                    type: integer
+                    minimum: 1
+                    maximum: 1000
+                    default: 25
+                    description: The maximum number of transfers to return.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getSubaccountsTransfers
+      x-operation-id-source: derived
+  /subaccounts/transfers/{transferId}:
+    get:
+      tags:
+      - Account Management
+      summary: Get transfer
+      security:
+      - Bitvavo-Access-Key: []
+        Bitvavo-Access-Timestamp: []
+        Bitvavo-Access-Signature: []
+        Bitvavo-Access-Window: []
+      description: 'Returns information about a transfer of assets between a subaccount and your main account.
+
+
+        :::info
+
+        This is a *private* endpoint. To send requests, you need to authenticate.
+
+        :::
+
+
+        :::warning
+
+        To use this private endpoint, you must use the API key of your main account with the **Internal transfer permission**.
+
+        ::::
+
+
+        **Rate limit weight points**: **5**'
+      parameters:
+      - name: transferId
+        in: path
+        description: The unique identifier for the transfer.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - transferId
+                - subaccountId
+                - direction
+                - symbol
+                - amount
+                - status
+                - createdAt
+                properties:
+                  transferId:
+                    type: string
+                    description: Bitvavo identifier of the transfer.
+                    format: uuid
+                  clientRequestId:
+                    type: string
+                    description: Your identifier of the transfer.
+                    format: uuid
+                  subaccountId:
+                    type: string
+                    description: The unique identifier for the subaccount.
+                    format: uuid
+                  direction:
+                    type: string
+                    description: Indicates the direction of the transfer.
+                    enum:
+                    - masterToSub
+                    - subToMaster
+                  symbol:
+                    type: string
+                    description: The asset that was transferred.
+                  amount:
+                    type: string
+                    description: The quantity of the asset to transfer.
+                  status:
+                    type: string
+                    description: Status of the transfer.
+                    enum:
+                    - failed
+                    - pending
+                    - completed
+                  createdAt:
+                    type: string
+                    description: The Unix timestamp when the transfer was created.
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getSubaccountsTransfersByTransferId
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/institutional-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/institutional-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

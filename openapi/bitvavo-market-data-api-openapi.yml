@@ -1,0 +1,1137 @@
+openapi: 3.2.0
+info:
+  title: Bitvavo REST Market data API
+  version: 2.10.0
+  description: Trading, market data, transfers, and account management using request-response messaging over HTTP.
+servers:
+- url: https://api.bitvavo.com/v2
+tags:
+- name: Market Data
+  description: Get the latest information about markets, trades, and candles on Bitvavo.
+paths:
+  /{market}/book:
+    get:
+      tags:
+      - Market Data
+      summary: Get order book
+      description: 'Returns the list of up to 1000 bids and asks per request for the specified `market`, sorted by `price`.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: 1'
+      parameters:
+      - name: market
+        description: 'The market for which to return the order book.
+
+          '
+        in: path
+        required: true
+        example: BTC-EUR
+        schema:
+          type: string
+      - name: depth
+        description: 'The number of `bids` and `asks` to return.
+
+          '
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          default: 1000
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.book('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    for (let entry of response.bids) {\n      console.log('Bids: ', entry)\n    }\n    for (let entry of response.asks) {\n      console.log('Asks: ', entry)\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.book('BTC-EUR', {})\nfor item in response['bids']:\n  print('Bids', item)\nfor item in response['asks']:\n  print('Asks', item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Book("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  market:
+                    description: The market for which the order book is returned.
+                    type: string
+                    example: BTC-EUR
+                  nonce:
+                    description: 'Unique identifier of the market data in the order book at a specific time. `nonce` is incremented by 1 every time the order book changes.
+
+                      For example, when an order is placed, updated, or deleted.
+
+                      '
+                    type: integer
+                    example: 438524
+                  bids:
+                    type: array
+                    description: "The list of buy orders for the specified `market` and `depth`. Every bid contains:\n\n- `price`: the offer for 1 unit of base currency in the amount of quote currency. For \nexample, **34243** Euros.\n\n- `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.\n"
+                    items:
+                      type: array
+                      items:
+                        type: string
+                    example:
+                    - - '4999.9'
+                      - '0.015'
+                    - - '4999.8'
+                      - '0.015'
+                    - - '4999.7'
+                      - '0.015'
+                    - - '4999.6'
+                      - '0.015'
+                  asks:
+                    type: array
+                    description: "The list of sell orders for the specified `market` and `depth`. Every bid contains:\n\n  - `price`: the offer for 1 unit of base currency in the amount of quote currency. For \nexample, **34243** Euros.                   \n\n  - `size`: the amount of base currency in the offer. For example, **0.1** Bitcoin.\n"
+                    items:
+                      type: array
+                      items:
+                        type: string
+                    example:
+                    - - '5001.1'
+                      - '0.015'
+                    - - '5001.2'
+                      - '0.015'
+                    - - '5001.3'
+                      - '0.015'
+                    - - '5001.4'
+                      - '0.015'
+                  timestamp:
+                    description: 'The Unix timestamp in nanoseconds when the snapshot was taken.
+
+                      '
+                    type: integer
+                    format: unix-timestamp in nanoseconds
+                    example: 1752139200000000000
+      4XX:
+        description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getByMarketBook
+      x-operation-id-source: derived
+  /report/{market}/book:
+    get:
+      tags:
+      - Market Data
+      summary: Get order book report
+      description: 'Returns the list of up to 1000 bids and asks for the specified `market`, sorted by `price`. Includes the data compliant with the European Markets in Crypto-Assets (MiCA) regulation.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: 1'
+      parameters:
+      - name: market
+        description: 'The market for which to return the order book.
+
+          '
+        in: path
+        required: true
+        example: BTC-EUR
+        schema:
+          type: string
+      - name: depth
+        description: 'The number of `bids` and `asks` to return.
+
+          '
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          default: 1000
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.book('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    for (let entry of response.bids) {\n      console.log('Bids: ', entry)\n    }\n    for (let entry of response.asks) {\n      console.log('Asks: ', entry)\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.book('BTC-EUR', {})\nfor item in response['bids']:\n  print('Bids', item)\nfor item in response['asks']:\n  print('Asks', item)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Book("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { fmt.Printf("%+v\n", response) }'
+      responses:
+        '200':
+          description: The request was successful.
+          headers:
+            bitvavo-ratelimit-remaining:
+              description: The number of remaining [weight points](/docs/rate-limits) before it resets at `bitvavo-ratelimit-resetat`.
+              schema:
+                type: integer
+            bitvavo-ratelimit-resetat:
+              description: The time when `bitvavo-ratelimit-remaining` resets to `bitvavo-ratelimit-limit`.
+              schema:
+                type: integer
+                format: unix-timestamp in milliseconds
+            bitvavo-ratelimit-limit:
+              description: The number of available [weight points](/docs/rate-limits) in one minute.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  submissionTimestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-02T14:23:11.123456Z'
+                    description: 'The timestamp when the order book is submitted to the database.
+
+                      '
+                  assetCode:
+                    description: 'The DTI code or a symbol of the asset.
+
+                      '
+                    type: string
+                    example: 4K6P57CMJ
+                  assetName:
+                    description: 'The full name of the asset.
+
+                      '
+                    type: string
+                    example: Bitcoin
+                  bids:
+                    type: array
+                    description: 'The list of buy orders for the specified `market` and `depth`. Each bid includes:
+
+                      '
+                    items:
+                      type: object
+                      properties:
+                        side:
+                          type: string
+                          enum:
+                          - BUYI
+                          description: Indicates if the order is to buy or sell.
+                        price:
+                          type: string
+                          format: decimal
+                          example: '28500.1234567890123'
+                          description: The amount of quote currency for 1 unit of the base currency.
+                        quantity:
+                          type: string
+                          format: decimal
+                          example: '0.00123456789012345'
+                          description: The quantity of the asset.
+                        numOrders:
+                          type: integer
+                          example: 38
+                          description: The number of individual orders at this price level.
+                    example:
+                    - side: BUYI
+                      price: '28500.12'
+                      quantity: '0.5'
+                      numOrders: 12
+                    - side: BUYI
+                      price: '28499.90'
+                      quantity: '0.75'
+                      numOrders: 8
+                  asks:
+                    type: array
+                    description: 'The list of sell orders for the specified `market` and `depth`. Each ask includes:
+
+                      '
+                    items:
+                      type: object
+                      properties:
+                        side:
+                          type: string
+                          enum:
+                          - SELL
+                          description: Indicates if the order is to buy or sell.
+                        price:
+                          type: string
+                          format: decimal
+                          example: '28500.1234567890123'
+                          description: The amount of quote currency for 1 unit of the base currency.
+                        quantity:
+                          type: string
+                          format: decimal
+                          example: '0.00123456789012345'
+                          description: The quantity of the asset.
+                        numOrders:
+                          type: integer
+                          example: 38
+                          description: The number of individual orders at this price level.
+                    example:
+                    - side: SELL
+                      price: '28510.00'
+                      quantity: '0.4'
+                      numOrders: 9
+                    - side: SELL
+                      price: '28520.00'
+                      quantity: '1.1'
+                      numOrders: 14
+                  priceCurrency:
+                    description: 'The DTI code or a symbol of the currency in which the price is expressed.
+
+                      '
+                    type: string
+                    example: 4K6P57CMJ
+                  priceNotation:
+                    description: 'The price expressed as a monetary value.
+
+                      '
+                    type: string
+                    example: MONE
+                    enum:
+                    - MONE
+                  quantityCurrency:
+                    description: 'The currency in which the quantity of the crypto asset is expressed.
+
+                      '
+                    type: string
+                    example: EUR
+                  quantityNotation:
+                    description: 'The quantity of the crypto asset.
+
+                      '
+                    type: string
+                    example: CRYP
+                    enum:
+                    - CRYP
+                  venue:
+                    description: 'The Market Identifier Code of the Bitvavo trading platform.
+
+                      '
+                    type: string
+                    example: VAVO
+                  tradingSystem:
+                    description: 'The trading system identifier of the Bitvavo trading platform.
+
+                      '
+                    type: string
+                    example: VAVO
+                  publicationTimestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-02T14:23:11.123456Z'
+                    description: 'The timestamp when the book snapshot is added to the database.
+
+                      '
+      4XX:
+        description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getReportByMarketBook
+      x-operation-id-source: derived
+  /{market}/trades:
+    get:
+      tags:
+      - Market Data
+      summary: Get trades
+      description: 'Returns the list of trades made by all Bitvavo users for the specified `market` and time period up to 24 hours.
+
+
+        The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+
+        :::tip
+
+        To get the list of your past trades, make a Get trades history request.
+
+        :::
+
+
+        **Rate limit weight points**: 5'
+      parameters:
+      - name: market
+        required: true
+        in: path
+        example: BTC-EUR
+        description: 'The market for which to return the trades.
+
+          '
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: 'The maximum number of trades to return.
+
+          '
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - name: start
+        required: false
+        in: query
+        description: 'The Unix timestamp starting from which to return trades.
+
+          <br/>
+
+          > Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - name: end
+        required: false
+        in: query
+        description: 'The Unix timestamp until which to return trades.
+
+          <br/>
+
+          > Cannot be more than 24 hours after the `start` parameter. Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      - name: tradeIdFrom
+        required: false
+        in: query
+        description: 'The unique identifier of the trade starting from which to return the trades.
+
+          '
+        schema:
+          type: string
+      - name: tradeIdTo
+        required: false
+        in: query
+        description: 'The unique identifier of the trade up to which to return the trades.
+
+          '
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\n// All optional parameters are used to limit the results.\nbitvavo.publicTrades('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    console.log('Trade: ', response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.publicTrades('BTC-EUR', {})\nfor trade in response:\n  print(trade)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.PublicTrades("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { for _, trade := range response { fmt.Printf("%+v\n", trade) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: The unique identifier of the trade.
+                      type: string
+                      example: 57b1159b-6bf5-4cde-9e2c-6bd6a5678baf
+                    timestamp:
+                      description: The Unix timestamp when the trade was made.
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1542967486256
+                    amount:
+                      description: "The amount of base currency exchanged in the trade. For example, **0.1** Bitcoin.   \n"
+                      type: string
+                      example: '0.1'
+                    price:
+                      description: "The price of 1 unit of base currency in the amount of quote currency at the time of the trade.\nFor example, **34243** Euro.  \n"
+                      type: string
+                      example: 34,243
+                    side:
+                      description: 'Indicates if the taker, who fills the order, is selling or buying.
+
+                        '
+                      type: string
+                      enum:
+                      - sell
+                      - buy
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getByMarketTrades
+      x-operation-id-source: derived
+  /report/{market}/trades:
+    get:
+      tags:
+      - Market Data
+      summary: Get trades report
+      description: 'Returns the list of trades from for the specified `market` and time period made by all Bitvavo users. The returned trades are sorted by their `timestamp` in a descending order, from the latest to the earliest. Includes the data compliant with the European Markets in Crypto-Assets (MiCA) regulation.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: 5'
+      parameters:
+      - name: market
+        required: true
+        in: path
+        example: BTC-EUR
+        description: 'The market for which to return the trades.
+
+          '
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: 'The maximum number of trades to return.
+
+          '
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - name: start
+        required: false
+        in: query
+        description: 'The Unix timestamp starting from which to return trades.
+
+          <br/>
+
+          > Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+      - name: end
+        required: false
+        in: query
+        description: 'The Unix timestamp until which to return trades.
+
+          <br/>
+
+          > Cannot be more than 24 hours after the `start` parameter. Can only return trades for a period of up to 24 hours.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+      - name: tradeIdFrom
+        required: false
+        in: query
+        description: 'The unique identifier of the trade starting from which to return the trades.
+
+          '
+        schema:
+          type: string
+      - name: tradeIdTo
+        required: false
+        in: query
+        description: 'The unique identifier of the trade up to which to return the trades.
+
+          '
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\n// All optional parameters are used to limit the results.\nbitvavo.publicTrades('BTC-EUR', {}, (error, response) => {\n  if (error === null) {\n    console.log('Trade: ', response)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.publicTrades('BTC-EUR', {})\nfor trade in response:\n  print(trade)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.PublicTrades("BTC-EUR", map[string]string{}) if err != nil { fmt.Println(err) } else { for _, trade := range response { fmt.Printf("%+v\n", trade) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tradeId:
+                      description: The unique identifier of the trade.
+                      type: string
+                      example: 57b1159b-6bf5-4cde-9e2c-6bd6a5678baf
+                    transactTimestamp:
+                      description: 'The timestamp when the trade is added to the database.
+
+                        '
+                      type: string
+                      format: date-time
+                      example: '2024-05-02T14:43:11.123456Z'
+                    assetCode:
+                      description: 'The DTI code or a symbol of the asset.
+
+                        '
+                      type: string
+                      example: 4K6P57CMJ
+                    assetName:
+                      description: 'The full name of the asset.
+
+                        '
+                      type: string
+                      example: Bitcoin
+                    price:
+                      description: 'The price of 1 unit of base currency in the amount of quote currency at the time of the trade.
+
+                        For example, **34243** Euro.
+
+                        '
+                      type: string
+                      example: '34243'
+                    missingPrice:
+                      description: "Indicates if the price is pending (**PNDG**) or not applicable (**NOAP**). \n> If not applicable, the returned value might be empty.\n"
+                      type: string
+                      example: PNDG
+                    priceNotation:
+                      description: 'Indicates whether the price is expressed as a monetary value, percentage, yield, or basis points.
+
+                        '
+                      type: string
+                      example: MONE
+                      enum:
+                      - MONE
+                    priceCurrency:
+                      description: 'The currency in which the price is expressed.
+
+                        '
+                      type: string
+                      example: EUR
+                    quantity:
+                      description: 'The quantity of the asset.
+
+                        '
+                      type: string
+                      format: decimal
+                      example: '0.0324'
+                    quantityCurrency:
+                      description: 'The currency in which the quantity of the crypto asset is expressed.
+
+                        '
+                      type: string
+                      example: EUR
+                    quantityNotation:
+                      description: 'Indicates whether the quantity of the crypto asset is expressed as a number of units, nominal value, monetary value, or value in crypto assets.
+
+                        '
+                      type: string
+                      example: CRYP
+                      enum:
+                      - CRYP
+                    venue:
+                      description: 'The Market Identifier Code of the Bitvavo trading platform.
+
+                        '
+                      type: string
+                      example: VAVO
+                    publicationTimestamp:
+                      description: 'The timestamp when the trade is added to the database.
+
+                        '
+                      type: string
+                      format: date-time
+                      example: '2025-05-02T14:23:11.123456Z'
+                    publicationVenue:
+                      description: 'The Market Identifier Code of the trading platform that publishes the transaction.
+
+                        '
+                      type: string
+                      example: VAVO
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getReportByMarketTrades
+      x-operation-id-source: derived
+  /ticker/price:
+    get:
+      tags:
+      - Market Data
+      summary: Get ticker prices
+      description: 'Returns prices of the latest trades on Bitvavo for all markets or a single `market`.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+
+        :::note
+
+        A _tick_ in a market is any change in the price of a digital asset.
+
+        :::
+
+
+        **Rate limit weight points**: 1'
+      parameters:
+      - name: market
+        in: query
+        example: BTC-EUR
+        description: 'The market for which to return the latest information.
+
+
+          > For the list of all markets on Bitvavo, make a [Get markets](/docs/rest-api/get-markets) request.
+
+          '
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.tickerPrice({}, (error, response) => {\n  if (error === null) {\n    console.log('Current price for', response.market, ':', response.price)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.tickerPrice({})\nfor market in response:\n  print(market)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.TickerPrice(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, price := range response { fmt.Printf("%+v\n", price) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    market:
+                      description: The market for which you requested the latest trade price.
+                      type: string
+                      example: BTC-EUR
+                    price:
+                      description: The latest trade price for 1 unit of base currency in the amount of quote currency for the specified `market`. For example, **34243** Euro.
+                      type: string
+                      example: 34,243
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getTickerPrice
+      x-operation-id-source: derived
+  /ticker/book:
+    get:
+      tags:
+      - Market Data
+      summary: Get ticker book
+      description: 'Returns the highest buy and the lowest sell prices currently available for all markets, or a single `market`, in the Bitvavo order book.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: 1'
+      parameters:
+      - name: market
+        in: query
+        example: BTC-EUR
+        description: 'The market for which to return the latest information.
+
+
+          > For the list of all markets on Bitvavo, make a [Get markets](/docs/rest-api/get-markets) request.
+
+          '
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.tickerBook({}, (error, response) => {\n  if (error === null) {\n    console.log(response.market, 'book, bid:', response.bid, ' ask:', response.ask)\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.tickerBook({})\nfor market in response:\n  print(market)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.TickerBook(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, book := range response { fmt.Printf("%+v\n", book) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    market:
+                      description: The market for which you requested the current best bid and ask information.
+                      type: string
+                      example: BTC-EUR
+                    bid:
+                      description: 'The highest buy order in the quote currency for the `market` currently available on Bitvavo.
+
+                        '
+                      type: string
+                      example: '4999.9'
+                    bidSize:
+                      description: The amount of base currency for the `bid` in the order.
+                      type: string
+                      example: '0.15'
+                    ask:
+                      description: 'The lowest sell order in the quote currency for the `market` currently available on Bitvavo.
+
+                        '
+                      type: string
+                      example: '5003.3'
+                    askSize:
+                      description: The amount of base currency for the `ask` in the order.
+                      type: string
+                      example: '0.2'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getTickerBook
+      x-operation-id-source: derived
+  /{market}/candles:
+    get:
+      tags:
+      - Market Data
+      summary: Get candlestick data
+      description: 'Returns the OHLCV market data used to create candlestick charts.
+
+
+        Candlestick data is always returned in chronological order from the latest to the earliest. Data is returned when trades are made in the `interval` represented by that candlestick. If no trades occur you see a gap in data flow - zero trades are represented by zero candlesticks.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: 1'
+      parameters:
+      - name: market
+        in: path
+        required: true
+        example: BTC-EUR
+        description: 'The market for which to return the candlestick data.
+
+
+          > For the list of all markets on Bitvavo, make a [Get markets](/docs/rest-api/get-markets) request.
+
+          '
+        schema:
+          type: string
+      - name: interval
+        in: query
+        required: true
+        description: 'The time interval between each candlestick. Determines the allowed values for `start` and `end` parameters.
+
+          '
+        schema:
+          type: string
+          enum:
+          - 1m
+          - 5m
+          - 15m
+          - 30m
+          - 1h
+          - 2h
+          - 4h
+          - 6h
+          - 8h
+          - 12h
+          - 1d
+          - 1W
+          - 1M
+      - name: limit
+        in: query
+        description: 'The maximum number of candlestick data to return.
+
+          '
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1440
+          default: 1440
+      - name: start
+        required: false
+        in: query
+        description: 'The Unix timestamp starting from which to return the candlestick data.
+
+          <br/>
+
+          > The timestamp must align exactly with the start of the specified `interval`. For example, for a 1-hour candlestick that starts at 13:00:00.000 Amsterdam time, use `1704067200000`.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          minimum: 0
+        example: 1704067200000
+      - name: end
+        required: false
+        in: query
+        description: 'The Unix timestamp until which to return the candlestick data.
+
+          <br/>
+
+          > The timestamp must align exactly with the end of the specified `interval`. For example, for a 1-hour candlestick that ends at 14:00:00.000 Amsterdam time, use `1766062800000`.
+
+          '
+        schema:
+          type: integer
+          format: unix-timestamp in milliseconds
+          maximum: 8640000000000000
+        example: 1704153600000
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.candles('BTC-EUR', '1h', {}, (error, response) => {\n  if (error === null) {\n    for (let entry of response.candles) {\n      console.log('Timestamp: ', entry[0], ' Open: ', entry[1], ' High: ', entry[2], ' Low: ', entry[3], ' Close: ', entry[4], ' Volume: ', entry[5])\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\nfrom datetime import datetime, timezone\n\nbitvavo = Bitvavo()\n\n# Query the last 1440 one hour candles of the BTC-EUR market\ncandles = bitvavo.candles('BTC-EUR', '1h')\nfor (ts, o, h, l, c, v) in candles:\n  print('Timestamp', ts, 'open', o, 'high', h, 'low', l, 'close', c, 'volume', v)\n\n# Limit the result to 10 values\ncandles = bitvavo.candles('BTC-EUR', '1h', limit=10)\nfor (ts, o, h, l, c, v) in candles:\n  print('Timestamp', ts, 'open', o, 'high', h, 'low', l, 'close', c, 'volume', v)\n\n# Specify a date range\nstart = datetime(year=2024, month=1, day=1, hour=0, minute=0, tzinfo=timezone.utc)\nend   = datetime(year=2024, month=1, day=1, hour=1, minute=0, tzinfo=timezone.utc)\ncandles = bitvavo.candles('BTC-EUR', '15m', start=start, end=end)\nfor (ts, o, h, l, c, v) in candles:\n  print('Timestamp', ts, 'open', o, 'high', h, 'low', l, 'close', c, 'volume', v)\n\n# Before 1.3.2\ncandles = bitvavo.candles('BTC-EUR', '1h', {})\nfor candle in candles:\n  print('Timestamp', candle[0], ' open', candle[1], ' high', candle[2], ' low', candle[3], ' close', candle[4], ' volume', candle[5])\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Candles("BTC-EUR", "1h", map[string]string{}) if err != nil { fmt.Println(err) } else { for _, candle := range response.Candles { fmt.Printf("%+v\n", candle) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      description: The start time for this candlestick data.
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: '1538784000000'
+                    open:
+                      description: The starting price for the `market` at `timestamp`.
+                      type: string
+                      example: '4999'
+                    high:
+                      description: The highest price for the `market` during the `interval`.
+                      type: string
+                      example: '5012'
+                    low:
+                      description: The lowest price for the `market` during the `interval`.
+                      type: string
+                      example: '4999'
+                    close:
+                      description: The closing price for the `market` after the `interval`.
+                      type: string
+                      example: '5012'
+                    volume:
+                      description: The amount traded in the `market` during the `interval`.
+                      type: string
+                      example: '0.45'
+                minItems: 6
+                maxItems: 6
+                example:
+                - '1538784000000'
+                - '4999'
+                - '5012'
+                - '4999'
+                - '5012'
+                - '0.45'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getByMarketCandles
+      x-operation-id-source: derived
+  /ticker/24h:
+    get:
+      tags:
+      - Market Data
+      summary: Get ticker data 24h
+      description: 'Returns the OHLCV data about trades and orders for all markets, or a single `market`, on Bitvavo during the latest 24 hours.
+
+
+        :::info
+
+        This is a *public* endpoint. However, authenticating your request gives you a higher rate limit.
+
+        :::
+
+        **Rate limit weight points**: **25** (without `market`) or **1** (with `market`).'
+      parameters:
+      - name: market
+        in: query
+        example: BTC-EUR
+        description: 'The market for which to return the latest information.
+
+
+          > For the list of all markets on Bitvavo, make a [Get markets](/docs/rest-api/get-markets) request.
+
+          '
+        required: false
+        schema:
+          type: string
+      x-codeSamples:
+      - lang: JavaScript
+        source: "// The Javascript SDK works with callbacks and with promises. For info, check our GitHub.\nconst bitvavo = require('bitvavo')()\nbitvavo.ticker24h({}, (error, response) => {\n  if (error === null) {\n    for (let object of response) {\n      console.log(object)\n    }\n  } else {\n    console.log(error)\n  }\n})\n"
+      - lang: Python
+        source: "from python_bitvavo_api.bitvavo import Bitvavo\n\nbitvavo = Bitvavo()\nresponse = bitvavo.ticker24h({})\nfor market in response:\n  print(market)\n"
+      - lang: Go
+        source: 'import . "bitvavo" bitvavo := Bitvavo{}
+
+          response, err := bitvavo.Ticker24h(map[string]string{}) if err != nil { fmt.Println(err) } else { for _, ticker := range response { fmt.Printf("%+v\n", ticker) } }'
+      responses:
+        '200':
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    market:
+                      description: The market for which you requested the ticker data.
+                      type: string
+                      example: BTC-EUR
+                    startTimestamp:
+                      description: 'The time starting from which to return the data.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1700490607372
+                    timestamp:
+                      description: 'The time when the data was requested.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1700576057382
+                    open:
+                      description: The opening price for the `market` in the base currency.
+                      type: string
+                      example: '5001.1'
+                    openTimestamp:
+                      description: 'The time when the `market` opened after the `startTimestamp`.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1700490620146
+                    high:
+                      description: 'The highest trade price for 1 unit of base currency in the quote currency.
+
+                        '
+                      type: string
+                      example: '5003.2'
+                    low:
+                      description: 'The lowest trade price for 1 unit of base currency in the quote currency.
+
+                        '
+                      type: string
+                      example: '5001.1'
+                    last:
+                      description: 'The latest trade price for 1 unit of base currency in the quote currency.
+
+                        '
+                      type: string
+                      example: '5003.2'
+                    closeTimestamp:
+                      description: 'The time when the `market` closed after the `startTimestamp`.
+
+                        '
+                      type: integer
+                      format: unix-timestamp in milliseconds
+                      example: 1700490620146
+                    bid:
+                      description: 'The highest buy order in the quote currency.
+
+                        '
+                      type: string
+                      example: '4999.9'
+                    bidSize:
+                      description: 'The amount of base currency for the `bid`.
+
+                        '
+                      type: string
+                      example: '0.15'
+                    ask:
+                      description: 'The lowest sell order in the quote currency.
+
+                        '
+                      type: string
+                      example: '5003.3'
+                    askSize:
+                      description: 'The amount of base currency for the `ask`.
+
+                        '
+                      type: string
+                      example: '0.2'
+                    volume:
+                      description: 'The total amount of base currency traded.
+
+                        '
+                      type: string
+                      example: '0.15'
+                    volumeQuote:
+                      description: 'The total amount of quote currency traded.
+
+                        '
+                      type: string
+                      example: '750.2865'
+        4XX:
+          description: For error codes, see [Handle errors](/docs/errors).
+      operationId: getTicker24h
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    Bitvavo-Access-Key:
+      description: 'Your 64-character API key with the required [permissions](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Key
+      type: apiKey
+      in: header
+    Bitvavo-Access-Timestamp:
+      description: 'A Unix timestamp in milliseconds of the time when you make the request.
+
+        '
+      name: Bitvavo-Access-Timestamp
+      type: apiKey
+      in: header
+    Bitvavo-Access-Signature:
+      description: 'An HMAC-SHA256 hex-encoded string of the time, HTTP method, path, and parameters used to make the request. To learn more, see [Authentication](/docs/rest-api/introduction/).
+
+        '
+      name: Bitvavo-Access-Signature
+      type: apiKey
+      in: header
+    Bitvavo-Access-Window:
+      description: 'The execution timeout in milliseconds after Bitvavo-Access-Timestamp. The default value
+
+        is 10000, the maximum value is 60000.
+
+        '
+      name: Bitvavo-Access-Window
+      type: apiKey
+      in: header

@@ -1,3 +1,5 @@
+# x-archived-from: bitvavo-exchange-rest-openapi.yml
+# x-archived-on: 2026-10-13
 openapi: 3.0.2
 info:
   title: Bitvavo REST API
