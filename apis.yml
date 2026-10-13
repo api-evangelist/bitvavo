@@ -193,7 +193,8 @@ apis:
     url: openapi/bitvavo-transfer-api-openapi.yml
   - type: Documentation
     url: https://docs.bitvavo.com/
+x-tier: profiled
 x-enrichment:
-  date: '2026-10-13'
   status: enriched
-  pass: local-v1
+  pass: local-v5
+  date: '2026-10-13'

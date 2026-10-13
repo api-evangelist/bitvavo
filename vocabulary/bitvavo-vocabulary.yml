@@ -2,46 +2,49 @@ generated: '2026-10-13'
 method: derived
 generator: derive-vocabulary.py
 source:
-- openapi/bitvavo-exchange-rest-openapi.yml
-- openapi/bitvavo-institutional-openapi.yml
+- openapi/bitvavo-account-api-openapi.yml
+- openapi/bitvavo-account-management-api-openapi.yml
+- openapi/bitvavo-market-data-api-openapi.yml
+- openapi/bitvavo-subaccounts-api-openapi.yml
+- openapi/bitvavo-synchronization-api-openapi.yml
 vocabulary:
   name: Bitvavo Domain Vocabulary
   description: 'Terms declared by Bitvavo''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
     Derived, not authored.'
   version: '2026-10-13'
   terms:
-  - term: Market data
-    definition: Get the latest information about markets, trades, and candles on Bitvavo.
-    tags:
-    - Resource Group
-    source: openapi/bitvavo-exchange-rest-openapi.yml
-  - term: Trading
-    definition: Manage your orders and trades on Bitvavo.
-    tags:
-    - Resource Group
-    source: openapi/bitvavo-exchange-rest-openapi.yml
-  - term: Transfer
-    definition: Deposit and withdraw funds on Bitvavo.
-    tags:
-    - Resource Group
-    source: openapi/bitvavo-exchange-rest-openapi.yml
   - term: Account
     definition: Get information about your Bitvavo account.
     tags:
     - Resource Group
-    source: openapi/bitvavo-exchange-rest-openapi.yml
-  - term: Synchronization
-    definition: Synchronize markets and assets data with your app.
-    tags:
-    - Resource Group
-    source: openapi/bitvavo-exchange-rest-openapi.yml
+    source: openapi/bitvavo-account-api-openapi.yml
   - term: Account Management
     definition: Create and manage multiple subaccounts under one main account and transfer funds between them.
     tags:
     - Resource Group
-    source: openapi/bitvavo-institutional-openapi.yml
+    source: openapi/bitvavo-account-management-api-openapi.yml
+  - term: Market Data
+    definition: Get the latest information about markets, trades, and candles on Bitvavo.
+    tags:
+    - Resource Group
+    source: openapi/bitvavo-market-data-api-openapi.yml
   - term: Subaccounts
     definition: Get information about your subaccounts and manage orders.
     tags:
     - Resource Group
-    source: openapi/bitvavo-institutional-openapi.yml
+    source: openapi/bitvavo-subaccounts-api-openapi.yml
+  - term: Synchronization
+    definition: Synchronize markets and assets data with your app.
+    tags:
+    - Resource Group
+    source: openapi/bitvavo-synchronization-api-openapi.yml
+  - term: Trading
+    definition: Manage your orders and trades on Bitvavo.
+    tags:
+    - Resource Group
+    source: openapi/bitvavo-trading-api-openapi.yml
+  - term: Transfer
+    definition: Deposit and withdraw funds on Bitvavo.
+    tags:
+    - Resource Group
+    source: openapi/bitvavo-transfer-api-openapi.yml

@@ -2,8 +2,13 @@ generated: '2026-10-13'
 method: derived
 generator: derive-problem-types.py
 source:
-- openapi/bitvavo-exchange-rest-openapi.yml
-- openapi/bitvavo-institutional-openapi.yml
+- openapi/bitvavo-account-api-openapi.yml
+- openapi/bitvavo-account-management-api-openapi.yml
+- openapi/bitvavo-market-data-api-openapi.yml
+- openapi/bitvavo-subaccounts-api-openapi.yml
+- openapi/bitvavo-synchronization-api-openapi.yml
+- openapi/bitvavo-trading-api-openapi.yml
+- openapi/bitvavo-transfer-api-openapi.yml
 format: custom
 envelope:
   media_type: null
