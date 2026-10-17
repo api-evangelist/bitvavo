@@ -1,8 +1,8 @@
 {
   "provider": "bitvavo",
   "sources": [
-    "bitvavo-exchange-rest-openapi.yml",
-    "bitvavo-institutional-openapi.yml"
+    "_original/bitvavo-exchange-rest-openapi.yml",
+    "_original/bitvavo-institutional-openapi.yml"
   ],
   "outputs": [
     "bitvavo-account-api-openapi.yml",
@@ -13,16 +13,22 @@
     "bitvavo-account-management-api-openapi.yml",
     "bitvavo-subaccounts-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/bitvavo-exchange-rest-openapi.yml",
-    "archived openapi/bitvavo-institutional-openapi.yml"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (2 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "bitvavo-exchange-rest-openapi.yml: upgraded openapi 3.0.2 -> OpenAPI 3.2.0",
     "bitvavo-institutional-openapi.yml: upgraded openapi 3.0.2 -> OpenAPI 3.2.0",
-    "apis.yml register: written (+7 apis, 10 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "bitvavo-account-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-account-management-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-market-data-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-subaccounts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-synchronization-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-trading-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bitvavo-transfer-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
