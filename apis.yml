@@ -139,6 +139,8 @@ apis:
   humanURL: https://docs.bitvavo.com/
   baseURL: https://api.bitvavo.com/v2
   tags:
+  - Market Data
+  tags_raw:
   - Market data
   properties:
   - type: OpenAPI
