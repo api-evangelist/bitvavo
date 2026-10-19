@@ -7,10 +7,17 @@ source:
 - https://monid.ai/tools/bitvavo
 checked:
 - https://api.coingecko.com/api/v3/exchanges
+- https://api.nuget.org/v3
 - https://composio.dev/toolkits/bitvavo
+- https://crates.io/api/v1
 - https://monid.ai/tools/bitvavo
 - https://n8n.io/integrations/bitvavo/
+- https://proxy.golang.org
+- https://pypi.org/pypi
 - https://raw.githubusercontent.com/ccxt/ccxt/master/exchanges.json
+- https://registry.npmjs.org
+- https://repo1.maven.org/maven2
+- https://rubygems.org/api/v1
 - https://www.esma.europa.eu/sites/default/files/2024-12/CASPS.csv
 - https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv
 - https://zapier.com/apps/bitvavo/integrations
@@ -102,4 +109,34 @@ edges:
     detected: '2026-10-15'
   detected_by: sweep-capital-markets.py
   first_seen: '2026-10-15'
+- partner_name: npm registry
+  partner: npm
+  partner_match: register
+  type: register
+  direction: provider-built
+  category: official SDK (JavaScript/TypeScript)
+  evidence: https://www.npmjs.com/package/bitvavo
+  channel: package-registry
+  relationship: distribution-channel
+  contract_reference:
+    register: npm registry (public registry JSON)
+    spec_file: null
+    language: JavaScript/TypeScript
+    packages:
+    - name: bitvavo
+      version: 1.5.0
+      released: '2025-06-24'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/bitvavo
+      repo_leg: github-org:bitvavo
+      publisher_leg: email:bitvavo.com
+      matched_by: domain
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  detected_by: sweep-official-sdks.py
+  first_seen: '2026-10-18'
 templates: []
