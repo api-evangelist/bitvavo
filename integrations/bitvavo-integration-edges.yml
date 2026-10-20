@@ -24,6 +24,68 @@ checked:
 summary: null
 marketplace_apps: []
 edges:
+- partner_name: npm registry
+  partner: npm
+  partner_match: register
+  type: register
+  direction: provider-built
+  category: official SDK (JavaScript/TypeScript)
+  evidence: https://www.npmjs.com/package/bitvavo
+  channel: package-registry
+  relationship: distribution-channel
+  contract_reference:
+    register: npm registry (public registry JSON)
+    spec_file: null
+    language: JavaScript/TypeScript
+    packages:
+    - name: bitvavo
+      version: 1.5.0
+      released: '2025-06-24'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/bitvavo
+      repo_leg: github-org:bitvavo
+      publisher_leg: email:bitvavo.com
+      matched_by: domain
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  detected_by: sweep-official-sdks.py
+  first_seen: '2026-10-18'
+- partner_name: ISO 10383 (MIC)
+  partner: null
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv
+  source: mic
+  category: registered trading venues and market segments
+  contract_reference:
+    register: ISO 10383 Market Identifier Codes (ISO 20022 registration authority)
+    spec_file: null
+    standard: ISO 10383
+    role: venue operator
+    matched_domain: bitvavo.com
+    matched_by: domain:bitvavo.com
+    categories:
+    - CASP
+    operating_mics:
+    - VAVO
+    mics:
+    - mic: VAVO
+      operating_mic: VAVO
+      segment: OPRT
+      market: BITVAVO
+      category: CASP
+      legal_name: BITVAVO B.V.
+      country: NL
+    detected_by: sweep-capital-markets.py
+    detected: '2026-10-19'
+  detected_by: sweep-capital-markets.py
+  first_seen: '2026-10-19'
 - partner_name: CCXT
   partner: null
   partner_match: null
@@ -66,7 +128,7 @@ edges:
     registered_name: Bitvavo B.V.
     register_id: 724500MX2WBKDJP9HE56
     competent_authority: Netherlands Authority for the Financial Markets (AFM)
-    home_member_state: NL
+    home_member_state: 'NL '
     authorised: 26/06/2025
     services:
     - a. providing custody and administration of crypto-assets on behalf of clients
@@ -77,66 +139,4 @@ edges:
     detected: '2026-10-14'
   detected_by: sweep-crypto.py
   first_seen: '2026-10-14'
-- partner_name: ISO 10383 (MIC)
-  partner: null
-  type: register
-  channel: standard-directory
-  relationship: standard-participant
-  direction: partner-built
-  evidence: https://www.iso20022.org/sites/default/files/ISO10383_MIC/ISO10383_MIC.csv
-  source: mic
-  category: registered trading venues and market segments
-  contract_reference:
-    register: ISO 10383 Market Identifier Codes (ISO 20022 registration authority)
-    spec_file: null
-    standard: ISO 10383
-    role: venue operator
-    matched_domain: bitvavo.com
-    matched_by: domain:bitvavo.com
-    categories:
-    - CASP
-    operating_mics:
-    - VAVO
-    mics:
-    - mic: VAVO
-      operating_mic: VAVO
-      segment: OPRT
-      market: BITVAVO
-      category: CASP
-      legal_name: BITVAVO B.V.
-      country: NL
-    detected_by: sweep-capital-markets.py
-    detected: '2026-10-15'
-  detected_by: sweep-capital-markets.py
-  first_seen: '2026-10-15'
-- partner_name: npm registry
-  partner: npm
-  partner_match: register
-  type: register
-  direction: provider-built
-  category: official SDK (JavaScript/TypeScript)
-  evidence: https://www.npmjs.com/package/bitvavo
-  channel: package-registry
-  relationship: distribution-channel
-  contract_reference:
-    register: npm registry (public registry JSON)
-    spec_file: null
-    language: JavaScript/TypeScript
-    packages:
-    - name: bitvavo
-      version: 1.5.0
-      released: '2025-06-24'
-      released_field: modified
-      lapsed: false
-      page: https://www.npmjs.com/package/bitvavo
-      repo_leg: github-org:bitvavo
-      publisher_leg: email:bitvavo.com
-      matched_by: domain
-    current: true
-    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
-      24 months'
-    detected_by: sweep-official-sdks.py
-    detected: '2026-10-18'
-  detected_by: sweep-official-sdks.py
-  first_seen: '2026-10-18'
 templates: []
