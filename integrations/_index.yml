@@ -113,3 +113,35 @@
     detected: '2026-10-14'
   status: not-a-workflow
   arazzo: null
+- slug: bitvavo-dnb-public-register-supervised-institutions-netherlands
+  label: DNB public register (supervised institutions, Netherlands)
+  partner_name: DNB public register (supervised institutions, Netherlands)
+  category: Dutch financial supervisory licence (DNB)
+  type: register
+  channel: regulator-register
+  evidence: https://www.dnb.nl/en/public-register/
+  source: edge
+  relationship: standard-participant
+  contract_reference:
+    register: DNB public register (supervised institutions, Netherlands)
+    spec_file: null
+    standard: null
+    role: licensed-participant
+    registrations:
+    - registered_name: Bitvavo B.V.
+      licences:
+      - Payment service providers
+      - Art. 2:106a Wft Cross-border services provided to EEA by payment institution (EEA incl. NL) (SL)
+      register_country: NL
+      matched_domain: bitvavo.com
+      matched_by: domain
+      register_id: DNB R163129
+      lei: 724500MX2WBKDJP9HE56
+      identity: wikidata Q133040428 (LEI P1278) P856 https://bitvavo.com/
+    signal_note: 'participation only: a supervisory licence / authorisation; no API conformance is published by
+      this register'
+    detected_by: sweep-dach-financial-registers.py
+    detected: '2026-10-21'
+    identity_source: wikidata P856 (LEI P1278 or name; labelled provenance step; Kin 2026-10-15 decision 1)
+  status: not-a-workflow
+  arazzo: null
